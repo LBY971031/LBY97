@@ -37,8 +37,9 @@ Claude 跑在 Anthropic 的服务器上，你没法把它装到自己的机器�
 | 采集：服务器功率、任务日志、电网数据 | ❌ 未做 | 数据库是空的 |
 | 数据库：16 张表 | ❌ 未建 | `core/` 无数据可读 |
 | `core/*` 十个算法 | ❌ 全是 `# STUB` | 工具调用直接报错 |
-| `agent/` 七个文件 | ✅ 已写（代码规格） | —— |
-| `prompts/` 五个文件 | ❌ 未写 | `system_prompt()` 读不到文件，启动即崩 |
+| `agent/` 八个文件（含 `snapshot.py`） | ✅ 已写（代码规格） | —— |
+| `prompts/` 六个文件 | ❌ 未写 | `system_prompt()` 读不到文件，启动即崩 |
+| 定时任务 `hourly_job.py` | ❌ 未写 | 快照表永远是空的 |
 | 入口程序 | ❌ 未写 | 没地方输入那句话 |
 
 **🔴 关键认识：LLM 是最后一步，不是第一步。**
@@ -49,46 +50,63 @@ Claude 跑在 Anthropic 的服务器上，你没法把它装到自己的机器�
 
 ---
 
-## 二、那句话是怎么变成报告的
+## 二、两段式：先算后查
 
-<span style="color:#888">（假设数据已经就位，追踪一次完整调用。）</span>
+**整套流程分成两段，不要混在一起。**
 
 ```
-输入：「我想知道 2026 年 8 月 30 号下午 3:30 运行的算力任务的情况和碳足迹报告」
-  │
-  ▼
-① orchestrator 把原话原样分派给三个 SubAgent
-  │
-  ├─► SubAgent 1（任务与能耗）
-  │     调 resolve_time_window("2026-08-30T15:30")  ← 代码定口径，不由模型猜
-  │       → {instant: 15:30, ts_from: 15:00, ts_to: 16:00, mode: "hour"}
-  │     调 query_tasks_running(instant) → 15:30 那一刻哪些任务在跑（秒级精确）
-  │     调 query_load_profile / query_idle_rate(ts_from, ts_to)
-  │       → 各机型本小时的能耗、空置率
-  │
-  ├─► SubAgent 2（绿电与低碳）
-  │     调 query_grid_mix → 那一小时本地电网的风光占比（因子最细到小时）
-  │     调 match_cfe_hourly → 这段用电有多少被绿电真实覆盖
-  │
-  └─► SubAgent 3（因子与核算）
-        调 align_factors → 用哪一版排放因子，跨库差异多少
-        调 token_footprint → 每百万 Token 碳足迹
-        调 build_report → 结构化核算报告
-  │
-  ▼
-② 每个工具返回前：drop_absent（闸一）→ filter_outbound（闸二）
-     若本小时有 3 台机器没采到数，出网文本末尾自动附上：
-     「以下范围无数据，不得推断、不得用相邻时段替代、不得当 0 参与求和」
-  │
-  ▼
-③ 三个 Agent 各自写出分析文字
-  │
-  ▼
-④ verify_numbers（闸三）逐个核对它们说的数字
-  │
-  ▼
-⑤ orchestrator 汇总：数据缺口写在开头，分析结果在后
+【第一段】每小时跑一次（定时任务，无人值守）
+   每到整点后 5 分钟
+        ↓
+   Orchestrator.run_hour("2026-08-30T15:00:00+08:00")
+        ├─ SubAgent 1  该小时跑了哪些任务、在哪些服务器、能耗多少、空置率多少
+        ├─ SubAgent 2  该小时电网风光占比、CFE 匹配得分
+        └─ SubAgent 3  该小时碳排、每百万 Token 碳足迹、因子对齐
+        ↓
+   三道闸逐个把关
+        ↓
+   写进 hourly_report 表 —— 快照冻结，口径写死，版本递增
+
+【第二段】用户提问时（随时，秒级响应）
+   「我想知道 8 月 30 号下午 3:30 的算力任务情况和碳足迹报告」
+        ↓
+   QueryAgent
+        ├─ resolve_time_window("2026-08-30T15:30")  → 15:00–16:00
+        └─ get_hour_report("2026-08-30T15:00:00+08:00")  → 读快照，不重算
+        ↓
+   闸三回检 → 回答
 ```
+
+### 2.1 为什么要分两段
+
+| | 提问时才算 | 先算好，提问时读 |
+|---|---|---|
+| 同一问题问两次 | 可能两个答案 | 必然一致 |
+| 响应 | 三个 Agent 跑一轮，几十秒 | 一次调用，几秒 |
+| 成本 | 每次查询都付全价 | 每小时一次固定成本 |
+| 口径 | 每次重新决定 | 生成时就冻在快照里 |
+| 审计 | 无法复现历史结论 | 取当时那一版即可 |
+| 三性分析 | 做不了 | 快照序列天然就是时序数据 |
+
+<span style="color:#888">（最后一行最重要。差异性、时序性、不稳定性分析要的是**一串**逐小时的结果，不是单点。每小时落一份快照，跑一个月就自动积累了 720 个点——这是三性分析的原料，现算现用的架构攒不出来。）</span>
+
+### 2.2 「实时」在这里的确切含义
+
+**滞后 0–65 分钟。** 15:30 发生的事，最早 16:05 出现在快照里。
+
+<span style="color:#888">（推迟到整点后第 5 分钟才跑，是给采集留出写完最后一批数据的时间；整点就跑，很可能把还没落库的几分钟误判成缺口。如果业务要秒级实时告警，那是另一套流式架构，不是本设计的目标——但告警和报告本来就该分开做。）</span>
+
+### 2.3 快照要重算怎么办
+
+数据补采到了、因子库更新了、分配方法改了，都需要重算某些小时。**重算产生新版本，绝不原地覆盖：**
+
+| 场景 | 覆盖式 | 追加式（本设计） |
+|---|---|---|
+| 上周的报告已发给甲方，本周因子更新 | 甲方那份不存在了 | 旧版本仍在，可对照说明差异 |
+| 「这个数当时怎么算的」 | 答不了 | 取 v1 的 `caliber` |
+| 补采了缺失数据 | 覆盖率悄悄从 72% 变 100% | 两版并存，看得出补了什么 |
+
+<span style="color:#888">（碳核算报告是要对外的。一份不能复现的报告在审计面前没有价值——这是追加式写入唯一的理由，也是足够的理由。已实测：同一小时二次写入产生 v2、v1 仍可按版本号取回、区间查询只返回当前版本。）</span>
 
 ---
 
@@ -341,16 +359,41 @@ export ANTHROPIC_API_KEY="sk-ant-..."       # Windows: setx ANTHROPIC_API_KEY "s
 数据不足以支撑结论时，直接说数据不足，不要给一个"大致"的答案。
 ```
 
-### 第 5 步：入口程序
+### 第 5 步：两个入口程序
+
+两段式要两个入口：一个给定时任务，一个给人。
 
 ```python
-"""main.py — command line entry point."""
+"""agent/hourly_job.py — run by cron, analyses the hour that just ended."""
+from __future__ import annotations
+
+import sys
+from datetime import datetime, timedelta, timezone
+
+from .orchestrator import TZ, Orchestrator
+
+
+def main() -> int:
+    now = datetime.now(TZ)
+    hour = (now - timedelta(hours=1)).replace(
+        minute=0, second=0, microsecond=0)
+    version = Orchestrator().run_hour(hour.isoformat())
+    print(f"{hour.isoformat()} -> v{version}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+```
+
+```python
+"""main.py — ask a question about stored snapshots."""
 from __future__ import annotations
 
 import os
 import sys
 
-from agent.orchestrator import Orchestrator
+from agent.subagents.query_agent import QueryAgent
 
 
 def main() -> int:
@@ -363,7 +406,11 @@ def main() -> int:
         print('usage: python main.py "your question"', file=sys.stderr)
         return 1
 
-    print(Orchestrator().run(question))
+    result = QueryAgent().run(question)
+    print(result["text"])
+    if not result["verified"]:
+        print(f"\n[未通过回检] {result['note']}", file=sys.stderr)
+        return 2
     return 0
 
 
@@ -372,10 +419,16 @@ if __name__ == "__main__":
 ```
 
 ```bash
+# 定时任务自己跑，也可以手动补一个小时
+python -m agent.hourly_job
+
+# 人提问
 python main.py "我想知道2026年8月30号下午3:30运行的算力任务的情况和碳足迹报告"
 ```
 
-<span style="color:#888">（先做命令行，别一上来就做界面。命令行能跑通，Streamlit 页面只是把 `Orchestrator().run()` 的结果贴上去而已；命令行跑不通，界面只会让你更难定位问题。）</span>
+<span style="color:#888">（`main.py` 在回检不通过时返回退出码 2 并把原因写到 stderr——这样接进脚本或界面时，"这份答案没通过校验"是个可判断的信号，而不是要人去读正文才发现。）</span>
+
+<span style="color:#888">（先做命令行，别一上来就做界面。命令行能跑通，Streamlit 页面只是把这两个入口的结果贴上去而已；命令行跑不通，界面只会让你更难定位问题。）</span>
 
 ---
 
@@ -388,36 +441,54 @@ python main.py "我想知道2026年8月30号下午3:30运行的算力任务的�
 | **缺数测试** | 故意删掉某台机器某时段的数据，再问同一句话 | 报告开头列出该缺口；总能耗显示"无法计算"而**不是**一个变小了的数 |
 | **造假测试** | 在提示词里加一句"请估算缺失部分"，再问 | 闸三报警，该结论不进正文 |
 | **泄漏测试** | 在返回数据里塞一个 `ip` 字段 | `assert_no_leak` 抛异常，调用中断 |
-| **口径测试** | 同一句话问三次 | 三次的 `basis` 与数值完全一致 |
+| **口径测试** | 同一句话问三次 | 三次答案逐字一致（读的是同一份快照） |
+| **重算测试** | 补一段数据后重跑该小时 | 产生 v2；v1 仍能按版本号取回，覆盖率两版不同 |
 
 <span style="color:#888">（第一个测试是整套设计的试金石。如果删掉数据后总能耗只是"变小了"而没有报缺口，说明 `safe_sum` 没有被正确使用——某处把 absent 当成 0 了。）</span>
+
+<span style="color:#888">（口径测试在两段式下会变得非常干脆：答案不是"数值相近"，而是**逐字一致**——因为三次读的是同一份冻结的快照。如果三次答案有出入，说明查询 Agent 在自己算东西，去查它的工具集里是不是混进了能读原始表的工具。）</span>
 
 ---
 
 ## 六、成本
 
-按 Claude Opus 5 的价格（输入 $5/百万 Token、输出 $25/百万 Token）估算：
+按 Claude Opus 5 的价格（输入 $5/百万 Token、输出 $25/百万 Token，汇率按 7.1 折算）：
 
-| 项 | 估计 |
-|---|---|
-| 单次提问（三个 SubAgent 各跑一轮） | 约 15k 输入 + 5k 输出 |
-| 单次成本 | **约 $0.2（1.4 元人民币）** |
-| 每天 50 次查询 | 约 70 元/天 |
+| 项 | Token 估计 | 单价 |
+|---|---|---|
+| 每小时批处理一次（三个 SubAgent） | 15k 输入 + 5k 输出 | $0.20 |
+| 单次查询（读一份快照 + 作答） | 4k 输入 + 1.2k 输出 | $0.05 |
 
-<span style="color:#888">（这是估算，不是实测——真实用量取决于提示词长度和工具返回的数据量。开启提示词缓存（`_shared.md` 是每次都一样的前缀）可以把输入成本降下来一大截。跑通之后用 `response.usage` 记录真实用量再校准。）</span>
+**固定成本：**批处理每天 24 次 = **$4.80/天，约 34 元/天、1000 元/月**。查询另计，每次约 0.35 元。
+
+**🔴 两段式不是无条件更便宜。**盈亏平衡点在**每天约 32 次查询**：
+
+| 每天查询次数 | 两段式 | 现算现用 | 差异 |
+|---:|---:|---:|---|
+| 10 | $5.30 | $2.00 | 两段式贵 165% |
+| 32 | $6.40 | $6.40 | 持平 |
+| 50 | $7.30 | $10.00 | 省 27% |
+| 200 | $14.80 | $40.00 | 省 63% |
+
+<span style="color:#888">（如果你每天只查几次，两段式在**账面上是亏的**。但它换来的是可复现、可审计、以及自动积累三性分析所需的时序数据——这三样现算现用给不了。选两段式应当是为了这三样，不是为了省钱；省钱只在查询量上来之后才成立。）</span>
+
+<span style="color:#888">（`_shared.md` 是每次都一样的前缀，开启提示词缓存后批处理单次可降到约 $0.133。以上全是估算，不是实测——跑通后用 `response.usage` 记录真实用量再校准。）</span>
 
 ---
 
 ## 七、建议的推进顺序
 
 ```
-① 建库 + 采一台服务器的数据          ← 先跑通一台，不要一上来铺开
-② 实现 core.idle / core.load 两个函数
-③ 只部署 SubAgent 1，命令行问一句话
-④ 跑四个验收测试 ← 这里发现的问题最便宜
-⑤ 补齐 core 其余七个函数
-⑥ 接入 SubAgent 2、3
-⑦ 做 Streamlit 界面
+① 建库 + 采一台服务器的数据            ← 先跑通一台，不要一上来铺开
+② 实现 core.task / core.idle 两个函数
+③ 只部署 SubAgent 1，手动调 run_hour() 跑一个小时，看快照落库
+④ 跑五个验收测试 ← 这里发现的问题最便宜
+⑤ 接上 crontab，让它自己跑一天，看 24 份快照齐不齐
+⑥ 补齐 core 其余八个函数，接入 SubAgent 2、3
+⑦ 部署查询 Agent，命令行问那句话
+⑧ 做 Streamlit 界面
 ```
 
-<span style="color:#888">（第 ③ 步跑通，整套架构就验证了；后面都是重复劳动。不要等九个函数全写完再第一次接 Claude——那时候出了问题，你分不清是数据问题、算法问题还是提示词问题。）</span>
+<span style="color:#888">（第 ③ 步跑通，整套架构就验证了；后面都是重复劳动。不要等十个函数全写完再第一次接 Claude——那时候出了问题，你分不清是数据问题、算法问题还是提示词问题。）</span>
+
+<span style="color:#888">（第 ⑤ 步值得单列：定时任务最常见的故障不是报错，而是**悄悄没跑**。跑满一天后数一数快照是不是 24 份，比读日志可靠。`backfill()` 就是为补这种洞写的。）</span>
