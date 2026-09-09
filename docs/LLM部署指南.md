@@ -36,7 +36,7 @@ Claude 跑在 Anthropic 的服务器上，你没法把它装到自己的机器�
 |---|---|---|
 | 采集：服务器功率、任务日志、电网数据 | ❌ 未做 | 数据库是空的 |
 | 数据库：16 张表 | ❌ 未建 | `core/` 无数据可读 |
-| `core/*` 九个算法 | ❌ 全是 `# STUB` | 工具调用直接报错 |
+| `core/*` 十个算法 | ❌ 全是 `# STUB` | 工具调用直接报错 |
 | `agent/` 七个文件 | ✅ 已写（代码规格） | —— |
 | `prompts/` 五个文件 | ❌ 未写 | `system_prompt()` 读不到文件，启动即崩 |
 | 入口程序 | ❌ 未写 | 没地方输入那句话 |
@@ -61,10 +61,10 @@ Claude 跑在 Anthropic 的服务器上，你没法把它装到自己的机器�
   │
   ├─► SubAgent 1（任务与能耗）
   │     调 resolve_time_window("2026-08-30T15:30")  ← 代码定口径，不由模型猜
-  │       → {ts_from: 15:30+08:00, ts_to: 15:31+08:00, mode: "minute"}
-  │     调 query_tasks_running → 这一分钟里哪些任务在跑、各在哪台机器上
-  │     调 query_load_profile / query_idle_rate
-  │       → 各机型这一分钟的功率、能耗、空置率
+  │       → {instant: 15:30, ts_from: 15:00, ts_to: 16:00, mode: "hour"}
+  │     调 query_tasks_running(instant) → 15:30 那一刻哪些任务在跑（秒级精确）
+  │     调 query_load_profile / query_idle_rate(ts_from, ts_to)
+  │       → 各机型本小时的能耗、空置率
   │
   ├─► SubAgent 2（绿电与低碳）
   │     调 query_grid_mix → 那一小时本地电网的风光占比（因子最细到小时）
@@ -77,7 +77,7 @@ Claude 跑在 Anthropic 的服务器上，你没法把它装到自己的机器�
   │
   ▼
 ② 每个工具返回前：drop_absent（闸一）→ filter_outbound（闸二）
-     若那 15 分钟有 3 台机器没采到数，出网文本末尾自动附上：
+     若本小时有 3 台机器没采到数，出网文本末尾自动附上：
      「以下范围无数据，不得推断、不得用相邻时段替代、不得当 0 参与求和」
   │
   ▼
@@ -92,16 +92,90 @@ Claude 跑在 Anthropic 的服务器上，你没法把它装到自己的机器�
 
 ---
 
-## 三、口径已定：那一分钟
+## 三、时间分辨率定多少
 
-**「下午 3:30」= 15:30:00–15:31:00 这一分钟。** 要回答的是四件事：
+**结论：报告默认按小时，但采集必须保持分钟级。这两件事要分开定。**
 
-1. 这一分钟里有哪些算力任务在跑
-2. 它们分别跑在哪些服务器上
-3. 这一分钟的实时能耗
-4. 这一分钟的碳排放
+<span style="color:#888">（因为采集分辨率丢了就再也回不来，报告分辨率随时可以改。）</span>
 
-<span style="color:#888">（口径由代码定死，不由模型猜。同一句话问一百次，必须得到同一个窗口。）</span>
+### 3.0 为什么是这个结论
+
+**第一笔账：存储。**按园区 200 台服务器、每条记录约 80 字节估算：
+
+| 采样周期 | 点/台/天 | 年记录数 | 年存储 |
+|---|---:|---:|---:|
+| 1 秒 | 86,400 | 63.1 亿 | 470 GB |
+| 5 秒 | 17,280 | 12.6 亿 | 94 GB |
+| **1 分钟** | **1,440** | **1.05 亿** | **7.8 GB** |
+| 5 分钟 | 288 | 2,102 万 | 1.6 GB |
+| 15 分钟 | 96 | 701 万 | 535 MB |
+| 1 小时 | 24 | 175 万 | 134 MB |
+
+<span style="color:#888">（1 分钟采集一年 7.8 GB——对一块普通硬盘不构成压力。所以「分钟级采集太贵」这个顾虑，在这个规模下不成立。真正贵的是秒级。）</span>
+
+**第二笔账：小时聚合会丢掉什么。**造一天分钟级功率（基线 2 kW，15:25–15:35 有一次 8 kW 的十分钟尖峰），再聚合：
+
+| 分辨率 | 当日峰值 | 峰值/基线 | 全天电量 |
+|---|---:|---:|---:|
+| 1 分钟 | 8.00 kW | 4.00× | 49.0 kWh |
+| 5 分钟 | 8.00 kW | 4.00× | 49.0 kWh |
+| 15 分钟 | 4.00 kW | 2.00× | 49.0 kWh |
+| 1 小时 | 3.00 kW | 1.50× | 49.0 kWh |
+
+**关键发现：聚合保住能量，丢掉峰值。** 全天电量四种分辨率完全一致（49.0 kWh），但真实的 8 kW 峰值在小时均值里只显示为 3.00 kW，**低估 2.7 倍**。
+
+这直接决定了分工：
+
+| 你要算的东西 | 性质 | 小时够不够 |
+|---|---|---|
+| 能耗、碳排、碳足迹 | 能量（可加） | ✅ 完全够 |
+| 绿电匹配、CFE 得分 | 能量 | ✅ 够，且小时是国际通行粒度 |
+| **负荷突增、不稳定性** | **峰值/形状（不可加）** | ❌ **不够** |
+
+**尖峰要多大多久才能在小时均值里露头？**（抬升不足 20% 视为淹没）
+
+| 尖峰倍数 | 2 分钟 | 5 分钟 | 10 分钟 | 30 分钟 |
+|---|---:|---:|---:|---:|
+| 1.3× | 1% ✕ | 2% ✕ | 5% ✕ | 15% ✕ |
+| 2× | 3% ✕ | 8% ✕ | 17% ✕ | 50% ✓ |
+| 4× | 10% ✕ | 25% ✓ | 50% ✓ | 150% ✓ |
+
+<span style="color:#888">（读法：一次持续 10 分钟、幅度 2 倍的负荷突增，在小时均值里只抬升 17%，基本淹没在正常波动里。而你的核心问题之一正是「哪些时段负荷突然增高」——这类问题小时分辨率答不了。）</span>
+
+### 3.1 于是：三层分辨率
+
+```
+采集   1 分钟   ← 存下来，7.8 GB/年，丢了回不来
+  │
+  ├─► 报告   1 小时   ← 默认。能耗、碳排、绿电匹配都在这一层
+  │
+  └─► 下钻   1 分钟   ← 只在查不稳定性、定位负荷突增时才用
+```
+
+**为什么报告默认小时，三条理由：**
+
+1. **电网排放因子本来就是小时级的。** 报告按小时，因子粒度和数据粒度严丝合缝，不必解释错配。按分钟则是伪精度——分钟级能耗乘一个小时级因子，得到的碳排并不比小时级更准。
+2. **24/7 CFE 逐小时匹配是国际通行方法**（Google CFE Score、EnergyTag 都按小时）。按小时算，你的结果才和已发表工作可比——这对论文重要。
+3. **一天 24 个点，人看得过来。** 1440 个点只能画图，没法逐条核对。
+
+### 3.2 那「3:30 那一刻在跑什么任务」还答得了吗？
+
+**答得了，而且是精确的。** 因为这里有个容易混淆的地方：
+
+| | 数据形态 | 时间精度来源 | 受计量分辨率影响吗 |
+|---|---|---|---|
+| 任务清单 | **事件流**（有起止时间戳） | 日志本身，秒级 | ❌ 不受影响 |
+| 能耗曲线 | **时间序列**（等间隔采样） | 采样周期 | ✅ 直接决定 |
+
+任务记录是一条条带 `ts_start` / `ts_end` 的事件，它的时间精度来自推理服务的日志，**跟你多久采一次电表毫无关系**。所以：
+
+- 「15:30:00 那一刻哪些任务在跑」→ **精确可答**，区间重叠查询，秒级精度
+- 「那一分钟消耗了多少电」→ **取决于采集**，1 分钟采集才答得了
+- 「那一分钟排放了多少碳」→ **答不了**（因子是小时级），只能给所在小时
+
+<span style="color:#888">（所以你原来那句问话，拆开之后三个子问题的可答粒度是不一样的。报告必须分别标明，不能笼统写成「15:30 的碳足迹」。）</span>
+
+### 3.3 时间窗口工具
 
 ```python
 """agent/subagents/tools_time.py"""
@@ -113,144 +187,107 @@ from datetime import datetime, timedelta, timezone
 from anthropic import beta_tool
 
 TZ = timezone(timedelta(hours=8))          # park local time
-BUCKET_MIN = 15                            # PDU metering granularity
+SPANS = {"minute": timedelta(minutes=1),
+         "bucket": timedelta(minutes=15),
+         "hour": timedelta(hours=1)}
 
 
 @beta_tool
-def resolve_time_window(instant: str, mode: str = "minute") -> str:
-    """Resolve a single instant into an explicit half-open analysis window.
+def resolve_time_window(instant: str, mode: str = "hour") -> str:
+    """Resolve an instant into a half-open window for energy and carbon.
+
+    The returned `instant` keeps full precision for task-overlap queries,
+    which do not depend on metering resolution.
 
     Args:
         instant: ISO8601 instant, e.g. 2026-08-30T15:30:00.
-        mode: "minute" (default), "bucket" for the 15-minute metering
-            bucket containing it, or "hour" for the clock hour.
+        mode: "hour" (default, matches grid emission factor granularity),
+            "bucket" for 15 minutes, or "minute" for drill-down.
     """
+    if mode not in SPANS:
+        raise ValueError(f"unknown mode: {mode}")
+
     t = datetime.fromisoformat(instant)
     if t.tzinfo is None:
         t = t.replace(tzinfo=TZ)
-    t = t.replace(second=0, microsecond=0)
 
-    if mode == "minute":
-        start, span = t, timedelta(minutes=1)
+    floored = t.replace(second=0, microsecond=0)
+    if mode == "hour":
+        start = floored.replace(minute=0)
     elif mode == "bucket":
-        start = t.replace(minute=t.minute // BUCKET_MIN * BUCKET_MIN)
-        span = timedelta(minutes=BUCKET_MIN)
-    elif mode == "hour":
-        start, span = t.replace(minute=0), timedelta(hours=1)
+        start = floored.replace(minute=floored.minute // 15 * 15)
     else:
-        raise ValueError(f"unknown mode: {mode}")
+        start = floored
 
-    return json.dumps({"ts_from": start.isoformat(),
-                       "ts_to": (start + span).isoformat(),
+    return json.dumps({"instant": t.isoformat(),
+                       "ts_from": start.isoformat(),
+                       "ts_to": (start + SPANS[mode]).isoformat(),
                        "mode": mode}, ensure_ascii=False)
 ```
 
-<span style="color:#888">（已实测：`15:30:00` 与 `15:30:47` 都归到 `15:30–15:31`；`bucket` 模式得 `15:30–15:45`，`hour` 模式得 `15:00–16:00`；未知 mode 抛异常而非默默取默认值。）</span>
+<span style="color:#888">（已实测：`15:30:47` 在 `hour` 模式下得 `15:00–16:00`，在 `minute` 模式下得 `15:30–15:31`，而 `instant` 字段始终保留 `15:30:47` 的完整精度供任务查询使用；未知 mode 抛异常而非默默取默认值。）</span>
 
-**但把口径定到一分钟，会带出四个后果，每一个都会影响报告的可信度。**
-
-### 3.1 「哪些任务在跑」是区间重叠，不是时刻相等
+### 3.4 「哪些任务在跑」是区间重叠，不是时刻相等
 
 15:30 在跑的任务，绝大多数不是 15:30 开始的——它可能 15:22 就启动了，15:47 才结束。判据是**半开区间重叠**：
 
 ```sql
 SELECT * FROM task_run
-WHERE ts_start <  :window_to        -- 任务在窗口结束前就已开始
-  AND (ts_end IS NULL OR ts_end > :window_from)   -- 且在窗口开始后才结束
+WHERE ts_start <  :instant_or_window_to
+  AND (ts_end IS NULL OR ts_end > :instant_or_window_from)
 ```
 
 <span style="color:#888">（已按此判据实测六种情形：跨越整分钟的任务命中；15:30 整开始的命中；15:31 整结束的命中；15:30 整结束的**不**命中（半开区间右端不含）；15:31 整开始的**不**命中；`ts_end IS NULL` 命中。）</span>
 
-**`ts_end IS NULL` 要当心。** 对一次历史查询来说，它意味着「这条任务记录没有结束时间」——可能是任务真的还在跑（对 10 天前的数据而言不正常），也可能是日志丢了结束事件。**这种记录的能耗应标 `imputed` 或直接 `absent`，不能当成正常记录参与求和。**
+**`ts_end IS NULL` 要当心。** 对一次历史查询来说，它意味着这条记录没有结束时间——可能任务真的还在跑（对 10 天前的数据而言不正常），也可能是日志丢了结束事件。**这种记录的能耗应标 `imputed` 或 `absent`，不能当成正常记录参与求和。**
 
-### 3.2 一分钟里可能只有一个采样点，甚至没有
+### 3.5 同一台服务器上跑着多个任务时，能耗必须分摊
 
-这是最容易被忽略的一点：
-
-| 采集源 | 典型采样周期 | 一分钟窗口内的点数 |
-|---|---|---|
-| BMC / IPMI | 1–5 秒 | 12–60 个 ✅ |
-| GPU（`nvidia-smi`） | 1 秒 | 约 60 个，但实际采样覆盖率远低于此 ⚠️ |
-| PDU 计费表 | **15 分钟** | **0 或 1 个** 🔴 |
-
-**如果你的功率数据来自 PDU 计费表，你根本得不到「那一分钟」的能耗。** 你能得到的是它所在 15 分钟桶的平均功率，再乘以一分钟。这时：
-
-- `value_status` 必须是 `derived`，不是 `measured`
-- `caliber` 里必须写明 `sampling_interval_s: 900` 和推导方式
-- 报告里必须说「由 15 分钟均值推导」，**不能假装有分钟级精度**
-
-<span style="color:#888">（关于 `nvidia-smi`：早前我在审计文档里写过「分卡计量技术上可行，应作首选」，后来查证发现 A100/H100 上它只采样约 25% 的运行时间，MIG 也缺乏硬件级功率归属——那个说法我已撤回。分卡数据可以用，但不能当作精确的实测。）</span>
-
-### 3.3 一台服务器上跑着多个任务时，能耗必须分摊
-
-一分钟里，一台 8 卡机上可能同时跑着 3 个任务。**整机功率是一个数，要分到三个任务头上。** ISO 的分配层级是：
+一小时里，一台 8 卡机上可能跑过十几个任务。**整机能耗是一个数，要分到各任务头上。** ISO 的分配层级：
 
 ```
-① 能细分就细分     分卡计量  ← 见上，现实中不够可靠
+① 能细分就细分     分卡计量  ← 现实中不够可靠，见下
         ↓ 做不到
 ② 按物理量分配     GPU 时间份额 / 显存占用份额 / Token 份额  ← 现实中的主力
         ↓ 做不到
 ③ 按经济价值分配   计费额度                                 ← 最后手段
 ```
 
-**空载能耗不分摊给任何任务。** 那一分钟里没有任务在跑的卡，功耗是无主的，单列成「空载能耗」——把它摊给任务，会让任务的碳足迹凭空变大，也掩盖了真正该改进的问题（空置率）。
+**空载能耗不分摊给任何任务。** 没有任务在跑的卡，功耗是无主的，单列成「空载能耗」——摊给任务会让任务碳足迹凭空变大，还掩盖了真正该改进的问题（空置率）。
 
-<span style="color:#888">（分配方法必须写进 `caliber`。不同分配方法算出的单任务碳足迹可以差几倍，不标口径的数字没有可比性。）</span>
+<span style="color:#888">（关于分卡计量：早前我在审计文档里写过「技术上可行，应作首选」，后来查证发现 A100/H100 上 `nvidia-smi` 只采样约 25% 的运行时间，MIG 也缺乏硬件级功率归属——那个说法我已撤回。分卡数据可以用，但不能当作精确实测。分配方法必须写进 `caliber`：不同方法算出的单任务碳足迹可以差几倍，不标口径的数字没有可比性。）</span>
 
-### 3.4 碳排放做不到分钟级精度
+### 3.6 报告骨架
 
-**电网排放因子最细通常只到小时。** 那一分钟的碳排 = 那一分钟的能耗 × 15:00–16:00 那个小时的因子。
-
-所以：
-
-| 量 | 能达到的精度 |
-|---|---|
-| 能耗 | 分钟级（取决于采样，见 3.2） |
-| 碳排 | **小时级** —— 分钟级碳排是伪精度 |
-
-这不是系统缺陷，是物理现实。**但如果报告不写明，读者会以为碳排也精确到分钟。** 因子粒度必须进 `caliber`：
-
-```
-caliber: {
-    "window": "2026-08-30T15:30:00+08:00 ~ 15:31:00+08:00",
-    "energy_basis": "BMC 1s sampling, 58/60 points",
-    "allocation_method": "gpu_time_share",
-    "ef_source": "省级电网小时因子 v2026.3",
-    "ef_granularity_s": 3600,
-    "idle_energy_excluded": true
-}
-```
-
-### 3.5 那一分钟的报告长什么样
-
-<span style="color:#888">（骨架，尖括号是待填的真实数值——此处不放示例数字，避免被误读成真实结果。）</span>
+<span style="color:#888">（尖括号是待填的真实数值——此处不放示例数字，避免被误读成真实结果。）</span>
 
 ```
 ## 数据与校验缺口（先看这里）
 - 功率采样覆盖率 <x>/60，缺口 <ts 范围>
 - <n> 条任务记录 ts_end 为空，其能耗标为 absent，未参与求和
 
-## 窗口
-2026-08-30 15:30:00 ~ 15:31:00 (+08:00)，共 60 秒
+## 口径
+查询时刻   2026-08-30 15:30:00 (+08:00)
+能耗窗口   15:00:00 ~ 16:00:00，1 小时
+碳排窗口   15:00:00 ~ 16:00:00，受电网因子粒度约束，无法更细
+任务清单   按 15:30:00 这一时刻的区间重叠判定，秒级精确
 
-## 那一分钟在跑的任务
-| 任务 | 模型 | 服务器 | 起止 | 窗口内占比 | GPU 时间份额 |
-| job-<hash> | model-<hash> | sku-<hash> | 15:22–15:47 | 100% | <x>% |
+## 15:30:00 那一刻在跑的任务
+| 任务 | 模型 | 服务器 | 起止 | 本小时内运行时长 | GPU 时间份额 |
+| job-<hash> | model-<hash> | sku-<hash> | 15:22–15:47 | <x> min | <x>% |
 
-## 能耗
-| 服务器 | 整机能耗 | 任务分摊 | 空载（无主） | 覆盖率 |
+## 本小时能耗
+| 服务器 | 整机能耗 | 任务分摊 | 空载（无主） | 采样覆盖率 |
 
-## 碳排放
+## 本小时碳排放
 | 项 | 数值 | 因子 | 因子粒度 |
-| 运营碳排 | <x> gCO₂e | <省级电网小时因子> | 小时 |
+| 运营碳排 | <x> gCO₂e | <省级电网小时因子 v2026.3> | 小时 |
 
 ## 口径声明
 分配方法 / 因子版本 / 空载是否计入 / 采样推导方式
 ```
 
 **报告里必须写明用了哪个口径。** 这就是 `ToolEnvelope.caliber` 字段的用途——口径不明的数字会被当成可比数字，那是碳核算里最常见的错误。
-
----
 
 ## 四、部署五步
 
@@ -284,7 +321,7 @@ export ANTHROPIC_API_KEY="sk-ant-..."       # Windows: setx ANTHROPIC_API_KEY "s
 
 <span style="color:#888">（采不到的就明确标 `absent`，别填 0，别插值——这正是四态数据存在的意义。宁可报告里写「12% 时段无数据」，也不要一份看着完整、实则编造的报告。）</span>
 
-### 第 3 步：实现 `core/` 九个函数
+### 第 3 步：实现 `core/` 十个函数
 
 按 `SubAgent代码实现.md` §七 那张表逐个实现。每个函数只做一件事：**读数据库、算数、返回带 `value_status` 的点位**。不调 LLM，不做判断。
 
