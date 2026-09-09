@@ -27,7 +27,7 @@ agent/
 | `boundary.py` | 出网前的唯一出口：剔除禁发字段、脱敏、追加缺口禁令 | 所有工具的 `_emit()` | 明细数据（IP、序列号、原始路径）随分析请求上传 |
 | `verifier.py` | Agent 说完话之后，回头核对它说的每个数字 | `base.run()` | 编造的数字直接进报告，没人发现 |
 | `base.py` | 三个 SubAgent 的公共骨架：拼提示词、跑 `tool_runner`、收工具返回、触发回检 | 三个 Agent 子类 | 三份重复的循环代码，三种不一致的回检时机 |
-| `subagents/` | 九个工具（`@beta_tool`）+ 三个四行的 Agent 子类 | `orchestrator` | —— 这是实际干活的地方 |
+| `subagents/` | 十一个工具（`@beta_tool`）+ 三个四行的 Agent 子类 | `orchestrator` | —— 这是实际干活的地方 |
 | `orchestrator.py` | 主 Agent：分派任务给三个 SubAgent、失败隔离、汇总 | 平台的调用入口 | 一个 SubAgent 报错就炸掉整次分析 |
 | `prompts/` | 五个提示词文件：`_shared.md` + 四个各自的 | `base.system_prompt()` | 三道闸的自然语言版本无处安放 |
 
@@ -37,7 +37,7 @@ agent/
         orchestrator.py          汇总、隔离失败
               │
               ▼
-        subagents/               九个工具 + 三个 Agent 子类
+        subagents/               十一个工具 + 三个 Agent 子类
          │        │
          │        ▼
          │     base.py           跑 tool_runner、收工具返回
@@ -121,7 +121,7 @@ agent/
 |---|---|
 | 数字由代码算，话由 Agent 说 | 工具只返回 `ToolEnvelope`，Agent 拿不到任何计算工具 |
 
-<span style="color:#888">（这条没有对应的检查函数，它靠工具集的设计来保证：九个工具全部是「查询/测算」，没有一个接受表达式或让模型自定义算法。模型能做的只有挑工具、传参数、读结果、写话。闸三是它的事后验证。）</span>
+<span style="color:#888">（这条没有对应的检查函数，它靠工具集的设计来保证：十一个工具全部是「查询/测算/定口径」，没有一个接受表达式或让模型自定义算法。模型能做的只有挑工具、传参数、读结果、写话。闸三是它的事后验证。）</span>
 
 ---
 
@@ -416,10 +416,12 @@ def query_idle_rate(model_sku: str, ts_from: str, ts_to: str) -> str:
     ))
 ```
 
-<span style="color:#888">（九个工具形状完全一致，只有 `core.*` 不同，故只给一个范例。每个都套同一模板：取 core 结果 → `drop_absent` → 装进 `ToolEnvelope` → `_emit`。任何工具都不得自己拼返回串，否则边界就有了第二个出口。测算类工具的 `caliber` 必填，否则口径不明的数字会被当成可比数字。）</span>
+<span style="color:#888">（十个数据工具形状完全一致，只有 `core.*` 不同，故只给一个范例；`resolve_time_window` 是例外——纯日期计算，不读数据、不走 `core`。每个都套同一模板：取 core 结果 → `drop_absent` → 装进 `ToolEnvelope` → `_emit`。任何工具都不得自己拼返回串，否则边界就有了第二个出口。测算类工具的 `caliber` 必填，否则口径不明的数字会被当成可比数字。）</span>
 
 | Agent | 工具 | core 函数 | 回答 |
 |---|---|---|---|
+| 共用 | `resolve_time_window` | 无（纯日期计算） | 把「下午 3:30」定成确切窗口 |
+| 1 | `query_tasks_running` | `core.task.running_in` | 窗口内哪些任务在跑、各在哪台机器 |
 | 1 | `query_idle_rate` | `core.idle.idle_rate` | 空置率、空载能耗 |
 | 1 | `query_load_profile` | `core.load.profile` | 哪些时段负荷突增 |
 | 1 | `forecast_energy` | `core.forecast.energy` | 下一周期能耗预测 |
@@ -429,6 +431,8 @@ def query_idle_rate(model_sku: str, ts_from: str, ts_to: str) -> str:
 | 3 | `align_factors` | `core.factor.align` | 跨库因子对齐与差异 |
 | 3 | `token_footprint` | `core.token.footprint` | 每百万 Token 碳足迹 |
 | 3 | `build_report` | `core.report.render` | 核算报告 |
+
+<span style="color:#888">（`resolve_time_window` 与 `query_tasks_running` 是为「某时刻在跑什么」这类问句加的，见 [LLM 部署指南 §三](./LLM部署指南.md)。）</span>
 
 <span style="color:#888">（三个 Agent 类各自只是 `SubAgentBase` 的四行子类：设定 `name`、`prompt_file`、`tools`，无需额外逻辑。）</span>
 
@@ -529,7 +533,7 @@ def test_core_must_not_import_agent():
 |---|---|
 | 三道闸 | 已实测通过（含容差、平凡数字、脱敏、缺口禁令等边界用例） |
 | `tool_runner` 参数表 | 已用 anthropic 1.4.0 的 `inspect.signature` 实读确认 |
-| `core/*` 九个算法 | 未实现，工具里以 `# STUB` 标出 |
+| `core/*` 十个算法 | 未实现，工具里以 `# STUB` 标出 |
 | `prompts/` 五个文件 | 未写 |
 | `audit.py` | 未写。每次调用追加一行 JSON：`agent_name / tool_name / 收发摘要 / token 数` |
 

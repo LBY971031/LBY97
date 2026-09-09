@@ -61,12 +61,13 @@ Claude 跑在 Anthropic 的服务器上，你没法把它装到自己的机器�
   │
   ├─► SubAgent 1（任务与能耗）
   │     调 resolve_time_window("2026-08-30T15:30")  ← 代码定口径，不由模型猜
-  │       → {ts_from: 15:30+08:00, ts_to: 15:45+08:00, basis: "15 分钟计量桶"}
+  │       → {ts_from: 15:30+08:00, ts_to: 15:31+08:00, mode: "minute"}
+  │     调 query_tasks_running → 这一分钟里哪些任务在跑、各在哪台机器上
   │     调 query_load_profile / query_idle_rate
-  │       → 那 15 分钟里哪些机型在跑、跑什么模型、负荷多少、空置率多少
+  │       → 各机型这一分钟的功率、能耗、空置率
   │
   ├─► SubAgent 2（绿电与低碳）
-  │     调 query_grid_mix → 那 15 分钟本地电网的风光占比
+  │     调 query_grid_mix → 那一小时本地电网的风光占比（因子最细到小时）
   │     调 match_cfe_hourly → 这段用电有多少被绿电真实覆盖
   │
   └─► SubAgent 3（因子与核算）
@@ -91,17 +92,16 @@ Claude 跑在 Anthropic 的服务器上，你没法把它装到自己的机器�
 
 ---
 
-## 三、「下午 3:30」这个坑
+## 三、口径已定：那一分钟
 
-**一个时刻不是一个区间，但碳足迹必须按区间算。**「下午 3:30」至少有三种合理解释：
+**「下午 3:30」= 15:30:00–15:31:00 这一分钟。** 要回答的是四件事：
 
-| 口径 | 含义 | 适合回答 |
-|---|---|---|
-| 15 分钟计量桶 | 15:30–15:45 | 「那一刻的能耗和碳排」 |
-| 整点小时 | 15:00–16:00 | 「那个时段」，也是 CFE 逐小时匹配的天然粒度 |
-| 任务生命周期 | 15:30 时正在运行的任务，从它们各自启动到结束 | 「那些任务的完整碳足迹」 |
+1. 这一分钟里有哪些算力任务在跑
+2. 它们分别跑在哪些服务器上
+3. 这一分钟的实时能耗
+4. 这一分钟的碳排放
 
-**这个选择必须由代码定，不能交给模型。** 否则同一句话问两次，可能得到两个口径不同、数值不同的报告，而你无从判断哪个对。
+<span style="color:#888">（口径由代码定死，不由模型猜。同一句话问一百次，必须得到同一个窗口。）</span>
 
 ```python
 """agent/subagents/tools_time.py"""
@@ -113,38 +113,140 @@ from datetime import datetime, timedelta, timezone
 from anthropic import beta_tool
 
 TZ = timezone(timedelta(hours=8))          # park local time
-BUCKET_MIN = 15                            # metering granularity
+BUCKET_MIN = 15                            # PDU metering granularity
 
 
 @beta_tool
-def resolve_time_window(instant: str, mode: str = "bucket") -> str:
-    """Resolve a single instant into an explicit analysis window.
+def resolve_time_window(instant: str, mode: str = "minute") -> str:
+    """Resolve a single instant into an explicit half-open analysis window.
 
     Args:
         instant: ISO8601 instant, e.g. 2026-08-30T15:30:00.
-        mode: "bucket" for the metering bucket containing it,
-            "hour" for the clock hour containing it.
+        mode: "minute" (default), "bucket" for the 15-minute metering
+            bucket containing it, or "hour" for the clock hour.
     """
     t = datetime.fromisoformat(instant)
     if t.tzinfo is None:
         t = t.replace(tzinfo=TZ)
+    t = t.replace(second=0, microsecond=0)
 
-    if mode == "bucket":
-        start = t.replace(minute=t.minute // BUCKET_MIN * BUCKET_MIN,
-                          second=0, microsecond=0)
-        span, basis = timedelta(minutes=BUCKET_MIN), "metering bucket"
+    if mode == "minute":
+        start, span = t, timedelta(minutes=1)
+    elif mode == "bucket":
+        start = t.replace(minute=t.minute // BUCKET_MIN * BUCKET_MIN)
+        span = timedelta(minutes=BUCKET_MIN)
     elif mode == "hour":
-        start = t.replace(minute=0, second=0, microsecond=0)
-        span, basis = timedelta(hours=1), "clock hour"
+        start, span = t.replace(minute=0), timedelta(hours=1)
     else:
         raise ValueError(f"unknown mode: {mode}")
 
     return json.dumps({"ts_from": start.isoformat(),
                        "ts_to": (start + span).isoformat(),
-                       "basis": basis}, ensure_ascii=False)
+                       "mode": mode}, ensure_ascii=False)
 ```
 
-<span style="color:#888">（已实测：`15:30` → `15:30–15:45`；`15:29:59` → `15:15–15:30`（正确落在上一个桶）；带时区的输入不被二次转换；未知 mode 抛异常而非默默取默认值。）</span>
+<span style="color:#888">（已实测：`15:30:00` 与 `15:30:47` 都归到 `15:30–15:31`；`bucket` 模式得 `15:30–15:45`，`hour` 模式得 `15:00–16:00`；未知 mode 抛异常而非默默取默认值。）</span>
+
+**但把口径定到一分钟，会带出四个后果，每一个都会影响报告的可信度。**
+
+### 3.1 「哪些任务在跑」是区间重叠，不是时刻相等
+
+15:30 在跑的任务，绝大多数不是 15:30 开始的——它可能 15:22 就启动了，15:47 才结束。判据是**半开区间重叠**：
+
+```sql
+SELECT * FROM task_run
+WHERE ts_start <  :window_to        -- 任务在窗口结束前就已开始
+  AND (ts_end IS NULL OR ts_end > :window_from)   -- 且在窗口开始后才结束
+```
+
+<span style="color:#888">（已按此判据实测六种情形：跨越整分钟的任务命中；15:30 整开始的命中；15:31 整结束的命中；15:30 整结束的**不**命中（半开区间右端不含）；15:31 整开始的**不**命中；`ts_end IS NULL` 命中。）</span>
+
+**`ts_end IS NULL` 要当心。** 对一次历史查询来说，它意味着「这条任务记录没有结束时间」——可能是任务真的还在跑（对 10 天前的数据而言不正常），也可能是日志丢了结束事件。**这种记录的能耗应标 `imputed` 或直接 `absent`，不能当成正常记录参与求和。**
+
+### 3.2 一分钟里可能只有一个采样点，甚至没有
+
+这是最容易被忽略的一点：
+
+| 采集源 | 典型采样周期 | 一分钟窗口内的点数 |
+|---|---|---|
+| BMC / IPMI | 1–5 秒 | 12–60 个 ✅ |
+| GPU（`nvidia-smi`） | 1 秒 | 约 60 个，但实际采样覆盖率远低于此 ⚠️ |
+| PDU 计费表 | **15 分钟** | **0 或 1 个** 🔴 |
+
+**如果你的功率数据来自 PDU 计费表，你根本得不到「那一分钟」的能耗。** 你能得到的是它所在 15 分钟桶的平均功率，再乘以一分钟。这时：
+
+- `value_status` 必须是 `derived`，不是 `measured`
+- `caliber` 里必须写明 `sampling_interval_s: 900` 和推导方式
+- 报告里必须说「由 15 分钟均值推导」，**不能假装有分钟级精度**
+
+<span style="color:#888">（关于 `nvidia-smi`：早前我在审计文档里写过「分卡计量技术上可行，应作首选」，后来查证发现 A100/H100 上它只采样约 25% 的运行时间，MIG 也缺乏硬件级功率归属——那个说法我已撤回。分卡数据可以用，但不能当作精确的实测。）</span>
+
+### 3.3 一台服务器上跑着多个任务时，能耗必须分摊
+
+一分钟里，一台 8 卡机上可能同时跑着 3 个任务。**整机功率是一个数，要分到三个任务头上。** ISO 的分配层级是：
+
+```
+① 能细分就细分     分卡计量  ← 见上，现实中不够可靠
+        ↓ 做不到
+② 按物理量分配     GPU 时间份额 / 显存占用份额 / Token 份额  ← 现实中的主力
+        ↓ 做不到
+③ 按经济价值分配   计费额度                                 ← 最后手段
+```
+
+**空载能耗不分摊给任何任务。** 那一分钟里没有任务在跑的卡，功耗是无主的，单列成「空载能耗」——把它摊给任务，会让任务的碳足迹凭空变大，也掩盖了真正该改进的问题（空置率）。
+
+<span style="color:#888">（分配方法必须写进 `caliber`。不同分配方法算出的单任务碳足迹可以差几倍，不标口径的数字没有可比性。）</span>
+
+### 3.4 碳排放做不到分钟级精度
+
+**电网排放因子最细通常只到小时。** 那一分钟的碳排 = 那一分钟的能耗 × 15:00–16:00 那个小时的因子。
+
+所以：
+
+| 量 | 能达到的精度 |
+|---|---|
+| 能耗 | 分钟级（取决于采样，见 3.2） |
+| 碳排 | **小时级** —— 分钟级碳排是伪精度 |
+
+这不是系统缺陷，是物理现实。**但如果报告不写明，读者会以为碳排也精确到分钟。** 因子粒度必须进 `caliber`：
+
+```
+caliber: {
+    "window": "2026-08-30T15:30:00+08:00 ~ 15:31:00+08:00",
+    "energy_basis": "BMC 1s sampling, 58/60 points",
+    "allocation_method": "gpu_time_share",
+    "ef_source": "省级电网小时因子 v2026.3",
+    "ef_granularity_s": 3600,
+    "idle_energy_excluded": true
+}
+```
+
+### 3.5 那一分钟的报告长什么样
+
+<span style="color:#888">（骨架，尖括号是待填的真实数值——此处不放示例数字，避免被误读成真实结果。）</span>
+
+```
+## 数据与校验缺口（先看这里）
+- 功率采样覆盖率 <x>/60，缺口 <ts 范围>
+- <n> 条任务记录 ts_end 为空，其能耗标为 absent，未参与求和
+
+## 窗口
+2026-08-30 15:30:00 ~ 15:31:00 (+08:00)，共 60 秒
+
+## 那一分钟在跑的任务
+| 任务 | 模型 | 服务器 | 起止 | 窗口内占比 | GPU 时间份额 |
+| job-<hash> | model-<hash> | sku-<hash> | 15:22–15:47 | 100% | <x>% |
+
+## 能耗
+| 服务器 | 整机能耗 | 任务分摊 | 空载（无主） | 覆盖率 |
+
+## 碳排放
+| 项 | 数值 | 因子 | 因子粒度 |
+| 运营碳排 | <x> gCO₂e | <省级电网小时因子> | 小时 |
+
+## 口径声明
+分配方法 / 因子版本 / 空载是否计入 / 采样推导方式
+```
 
 **报告里必须写明用了哪个口径。** 这就是 `ToolEnvelope.caliber` 字段的用途——口径不明的数字会被当成可比数字，那是碳核算里最常见的错误。
 
