@@ -1,0 +1,3 @@
+# 唯一的第三方依赖。其余全部使用 Python 标准库
+# （json / sqlite3 / pathlib / datetime / re / hashlib / dataclasses）。
+anthropic>=1.4.0
