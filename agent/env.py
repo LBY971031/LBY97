@@ -38,7 +38,7 @@ def require_api_key() -> str:
             f"     位置：{ENV_FILE}\n\n"
             "  2. 设环境变量（临时）：\n"
             '     Mac/Linux:  export ANTHROPIC_API_KEY="sk-ant-..."\n'
-            '     Windows:    setx ANTHROPIC_API_KEY "sk-ant-..."\n\n"'
+            '     Windows:    setx ANTHROPIC_API_KEY "sk-ant-..."\n\n'
             ".env 已在 .gitignore 里，不会被提交。\n"
         )
     if not key.startswith("sk-ant-"):
