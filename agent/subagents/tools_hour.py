@@ -1,6 +1,8 @@
 """Tools for the hourly analysis pass. Every return goes through _emit()."""
 from __future__ import annotations
 
+from anthropic import beta_tool
+
 from ..boundary import assert_no_leak, filter_outbound
 from ..contract import ToolEnvelope, ToolStatus, drop_absent, safe_sum
 
@@ -16,8 +18,13 @@ def _emit(env: ToolEnvelope) -> str:
     return text
 
 
+@beta_tool
 def query_tasks_running(hour_start: str) -> str:
-    """List compute tasks overlapping one clock hour."""
+    """List compute tasks overlapping one clock hour.
+
+    Args:
+        hour_start: ISO8601 start of the hour, e.g. 2026-08-30T15:00:00+08:00.
+    """
     from core import hour as core_hour
 
     raw = core_hour.tasks_in_hour(hour_start)
@@ -33,8 +40,13 @@ def query_tasks_running(hour_start: str) -> str:
     ))
 
 
+@beta_tool
 def query_energy(hour_start: str) -> str:
-    """Per-server energy, per-task allocation and ownerless idle energy."""
+    """Per-server energy, per-task allocation and ownerless idle energy.
+
+    Args:
+        hour_start: ISO8601 start of the hour, e.g. 2026-08-30T15:00:00+08:00.
+    """
     from core import hour as core_hour
 
     raw = core_hour.energy_by_server(hour_start)
@@ -55,8 +67,13 @@ def query_energy(hour_start: str) -> str:
     ))
 
 
+@beta_tool
 def query_grid_mix(hour_start: str) -> str:
-    """Grid generation mix and emission factor for one clock hour."""
+    """Grid generation mix and emission factor for one clock hour.
+
+    Args:
+        hour_start: ISO8601 start of the hour, e.g. 2026-08-30T15:00:00+08:00.
+    """
     from core import hour as core_hour
 
     raw = core_hour.grid_hour(hour_start)
@@ -68,3 +85,34 @@ def query_grid_mix(hour_start: str) -> str:
         absent_ranges=gaps, quality_grade=raw["grade"],
         caliber={"ef_granularity_s": kept[0]["ef_granularity_s"] if kept else None},
     ))
+
+
+@beta_tool
+def query_carbon(hour_start: str) -> str:
+    """Operational carbon per server and per task, plus gCO2e per million tokens.
+
+    Args:
+        hour_start: ISO8601 start of the hour, e.g. 2026-08-30T15:00:00+08:00.
+    """
+    from core import hour as core_hour
+
+    raw = core_hour.carbon_hour(hour_start)
+    kept, gaps = drop_absent(raw["points"])
+    return _emit(ToolEnvelope(
+        status=ToolStatus.PARTIAL if gaps else ToolStatus.OK,
+        data={"servers": kept,
+              "per_task": raw.get("per_task", []),
+              "ef_gco2e_per_kwh": raw.get("ef_gco2e_per_kwh"),
+              "total_carbon_gco2e": _round(safe_sum(raw["points"], "carbon_gco2e"), 1),
+              "measured_carbon_gco2e": _round(safe_sum(kept, "carbon_gco2e"), 1),
+              "idle_carbon_gco2e": _round(safe_sum(kept, "idle_carbon_gco2e"), 1)},
+        expected_points=raw["expected"], actual_points=len(kept),
+        absent_ranges=gaps, quality_grade=raw["grade"],
+        caliber=raw.get("caliber"),
+    ))
+
+
+# 编号在这里落地：三个 SubAgent 各自能调的工具
+TOOLS_SUB1 = [query_tasks_running, query_energy]
+TOOLS_SUB2 = [query_grid_mix]
+TOOLS_SUB3 = [query_carbon]
