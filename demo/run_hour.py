@@ -12,6 +12,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from agent.env import load_env, require_api_key
 from agent.subagents.tools_hour import (query_energy, query_grid_mix,
                                         query_tasks_running)
 from agent.verifier import verify_numbers
@@ -47,26 +48,53 @@ def main() -> int:
     for name, p in zip(("tasks", "energy", "grid"), payloads):
         print(f"\n--- {name}  ({len(p)} chars) ---\n{p}")
 
+    load_env()
     if not os.environ.get("ANTHROPIC_API_KEY"):
         print("\n" + "=" * 72)
         print("ANTHROPIC_API_KEY 未设置，到此为止。")
         print("上面的数字全部由代码算出，不需要模型；")
-        print("设置密钥后重跑，模型只负责把它们写成一段话。")
+        print("设好密钥后重跑，模型只负责把它们写成一段话。")
+        print("设置方法：把 .env.example 复制成 .env，填上你的 key。")
         return 0
 
     import anthropic
 
+    require_api_key()
     client = anthropic.Anthropic()
-    msg = client.beta.messages.create(
-        model=MODEL,
-        max_tokens=8000,
-        system=SYSTEM,
-        thinking={"type": "adaptive"},
-        betas=["server-side-fallback-2026-07-01"],
-        fallbacks="default",
-        messages=[{"role": "user",
-                   "content": QUESTION + "\n\n工具返回：\n" + "\n\n".join(payloads)}],
-    )
+    try:
+        msg = client.beta.messages.create(
+            model=MODEL,
+            max_tokens=8000,
+            system=SYSTEM,
+            thinking={"type": "adaptive"},
+            betas=["server-side-fallback-2026-07-01"],
+            fallbacks="default",
+            messages=[{"role": "user",
+                       "content": QUESTION + "\n\n工具返回：\n"
+                                  + "\n\n".join(payloads)}],
+        )
+    except anthropic.AuthenticationError:
+        print("\n密钥无效。请到 https://console.anthropic.com/settings/keys "
+              "确认后更新 .env。", file=sys.stderr)
+        return 1
+    except anthropic.NotFoundError:
+        print(f"\n模型 {MODEL} 不可用：可能是你的账号尚未开通，"
+              "或模型名写错了。", file=sys.stderr)
+        return 1
+    except anthropic.RateLimitError:
+        print("\n触发速率限制，稍等片刻重试。", file=sys.stderr)
+        return 1
+    except anthropic.APIStatusError as exc:
+        print(f"\nAPI 返回 {exc.status_code}：{exc.message}", file=sys.stderr)
+        return 1
+    except anthropic.APIConnectionError:
+        print("\n连不上 Anthropic，检查网络或代理设置。", file=sys.stderr)
+        return 1
+
+    if msg.stop_reason == "refusal":
+        print("\n模型拒绝了本次请求，未生成报告。", file=sys.stderr)
+        return 1
+
     text = "".join(b.text for b in msg.content if b.type == "text")
 
     print("\n" + "=" * 72)
