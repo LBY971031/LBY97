@@ -1,0 +1,6 @@
+# 可选：LangChain / LangGraph 版本的 Agent（agent/base_langchain.py）。
+# 默认实现用官方 SDK 自带的 tool_runner，不需要这些依赖。
+# 只有要跑 demo/run_one_agent_lc.py 时才装。
+-r requirements.txt
+langchain-anthropic>=1.7.1
+langgraph>=1.0.0
