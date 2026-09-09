@@ -1,0 +1,2577 @@
+{
+  "_warning": "SYNTHETIC TEST DATA. Not measured. Never publish as real.",
+  "hour_start": "2026-08-30T15:00:00+08:00",
+  "sampling_interval_s": 60,
+  "servers": {
+    "srv-01": {
+      "server_model": "SKU-A/8xH100",
+      "gpu_count": 8,
+      "idle_kw": 1.2,
+      "max_kw": 6.5
+    },
+    "srv-02": {
+      "server_model": "SKU-A/8xH100",
+      "gpu_count": 8,
+      "idle_kw": 1.2,
+      "max_kw": 6.5
+    },
+    "srv-03": {
+      "server_model": "SKU-B/8xA100",
+      "gpu_count": 8,
+      "idle_kw": 1.0,
+      "max_kw": 4.8
+    },
+    "srv-04": {
+      "server_model": "SKU-C/4xL40S",
+      "gpu_count": 4,
+      "idle_kw": 0.5,
+      "max_kw": 1.8
+    }
+  },
+  "tasks": [
+    {
+      "task_id": "T01",
+      "model_id": "Qwen2.5-72B",
+      "device_id": "srv-01",
+      "gpus": 4,
+      "ts_start": "2026-08-30T14:52:00+08:00",
+      "ts_end": "2026-08-30T15:18:00+08:00",
+      "prefill_tokens": 820000,
+      "decode_tokens": 145000
+    },
+    {
+      "task_id": "T02",
+      "model_id": "Qwen2.5-72B",
+      "device_id": "srv-01",
+      "gpus": 4,
+      "ts_start": "2026-08-30T15:00:00+08:00",
+      "ts_end": "2026-08-30T15:45:00+08:00",
+      "prefill_tokens": 1240000,
+      "decode_tokens": 268000
+    },
+    {
+      "task_id": "T03",
+      "model_id": "DeepSeek-V3",
+      "device_id": "srv-01",
+      "gpus": 8,
+      "ts_start": "2026-08-30T15:47:00+08:00",
+      "ts_end": "2026-08-30T16:20:00+08:00",
+      "prefill_tokens": 2100000,
+      "decode_tokens": 415000
+    },
+    {
+      "task_id": "T04",
+      "model_id": "Llama-3.1-8B",
+      "device_id": "srv-02",
+      "gpus": 1,
+      "ts_start": "2026-08-30T15:05:00+08:00",
+      "ts_end": "2026-08-30T15:12:00+08:00",
+      "prefill_tokens": 96000,
+      "decode_tokens": 31000
+    },
+    {
+      "task_id": "T05",
+      "model_id": "Llama-3.1-8B",
+      "device_id": "srv-02",
+      "gpus": 1,
+      "ts_start": "2026-08-30T15:12:00+08:00",
+      "ts_end": "2026-08-30T15:19:00+08:00",
+      "prefill_tokens": 102000,
+      "decode_tokens": 28000
+    },
+    {
+      "task_id": "T06",
+      "model_id": "GLM-4-9B",
+      "device_id": "srv-02",
+      "gpus": 2,
+      "ts_start": "2026-08-30T15:30:00+08:00",
+      "ts_end": "2026-08-30T15:58:00+08:00",
+      "prefill_tokens": 340000,
+      "decode_tokens": 87000
+    },
+    {
+      "task_id": "T07",
+      "model_id": "DeepSeek-V3",
+      "device_id": "srv-03",
+      "gpus": 8,
+      "ts_start": "2026-08-30T15:10:00+08:00",
+      "ts_end": "2026-08-30T15:52:00+08:00",
+      "prefill_tokens": 1880000,
+      "decode_tokens": 392000
+    },
+    {
+      "task_id": "T08",
+      "model_id": "bge-m3",
+      "device_id": "srv-04",
+      "gpus": 1,
+      "ts_start": "2026-08-30T15:00:00+08:00",
+      "ts_end": "2026-08-30T15:30:00+08:00",
+      "prefill_tokens": 610000,
+      "decode_tokens": 0
+    },
+    {
+      "task_id": "T09",
+      "model_id": "bge-m3",
+      "device_id": "srv-04",
+      "gpus": 1,
+      "ts_start": "2026-08-30T15:30:00+08:00",
+      "ts_end": "2026-08-30T16:00:00+08:00",
+      "prefill_tokens": 655000,
+      "decode_tokens": 0
+    },
+    {
+      "task_id": "T10",
+      "model_id": "Qwen2.5-7B",
+      "device_id": "srv-04",
+      "gpus": 2,
+      "ts_start": "2026-08-30T15:40:00+08:00",
+      "ts_end": "2026-08-30T15:55:00+08:00",
+      "prefill_tokens": 188000,
+      "decode_tokens": 44000
+    }
+  ],
+  "power_samples": [
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:00:00+08:00",
+      "ts_end": "2026-08-30T15:01:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 6.5,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:01:00+08:00",
+      "ts_end": "2026-08-30T15:02:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 6.5,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:02:00+08:00",
+      "ts_end": "2026-08-30T15:03:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 6.5,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:03:00+08:00",
+      "ts_end": "2026-08-30T15:04:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 6.5,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:04:00+08:00",
+      "ts_end": "2026-08-30T15:05:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 6.5,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:05:00+08:00",
+      "ts_end": "2026-08-30T15:06:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 6.5,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:06:00+08:00",
+      "ts_end": "2026-08-30T15:07:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 6.5,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:07:00+08:00",
+      "ts_end": "2026-08-30T15:08:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 6.5,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:08:00+08:00",
+      "ts_end": "2026-08-30T15:09:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 6.5,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:09:00+08:00",
+      "ts_end": "2026-08-30T15:10:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 6.5,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:10:00+08:00",
+      "ts_end": "2026-08-30T15:11:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 6.5,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:11:00+08:00",
+      "ts_end": "2026-08-30T15:12:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 6.5,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:12:00+08:00",
+      "ts_end": "2026-08-30T15:13:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 6.5,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:13:00+08:00",
+      "ts_end": "2026-08-30T15:14:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 6.5,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:14:00+08:00",
+      "ts_end": "2026-08-30T15:15:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 6.5,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:15:00+08:00",
+      "ts_end": "2026-08-30T15:16:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 6.5,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:16:00+08:00",
+      "ts_end": "2026-08-30T15:17:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 6.5,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:17:00+08:00",
+      "ts_end": "2026-08-30T15:18:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 6.5,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:18:00+08:00",
+      "ts_end": "2026-08-30T15:19:00+08:00",
+      "busy_gpus": 4,
+      "gpu_count": 8,
+      "power_kw": 3.85,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:19:00+08:00",
+      "ts_end": "2026-08-30T15:20:00+08:00",
+      "busy_gpus": 4,
+      "gpu_count": 8,
+      "power_kw": 3.85,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:20:00+08:00",
+      "ts_end": "2026-08-30T15:21:00+08:00",
+      "busy_gpus": 4,
+      "gpu_count": 8,
+      "power_kw": 3.85,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:21:00+08:00",
+      "ts_end": "2026-08-30T15:22:00+08:00",
+      "busy_gpus": 4,
+      "gpu_count": 8,
+      "power_kw": 3.85,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:22:00+08:00",
+      "ts_end": "2026-08-30T15:23:00+08:00",
+      "busy_gpus": 4,
+      "gpu_count": 8,
+      "power_kw": 3.85,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:23:00+08:00",
+      "ts_end": "2026-08-30T15:24:00+08:00",
+      "busy_gpus": 4,
+      "gpu_count": 8,
+      "power_kw": 3.85,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:24:00+08:00",
+      "ts_end": "2026-08-30T15:25:00+08:00",
+      "busy_gpus": 4,
+      "gpu_count": 8,
+      "power_kw": 3.85,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:25:00+08:00",
+      "ts_end": "2026-08-30T15:26:00+08:00",
+      "busy_gpus": 4,
+      "gpu_count": 8,
+      "power_kw": 3.85,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:26:00+08:00",
+      "ts_end": "2026-08-30T15:27:00+08:00",
+      "busy_gpus": 4,
+      "gpu_count": 8,
+      "power_kw": 3.85,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:27:00+08:00",
+      "ts_end": "2026-08-30T15:28:00+08:00",
+      "busy_gpus": 4,
+      "gpu_count": 8,
+      "power_kw": 3.85,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:28:00+08:00",
+      "ts_end": "2026-08-30T15:29:00+08:00",
+      "busy_gpus": 4,
+      "gpu_count": 8,
+      "power_kw": 3.85,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:29:00+08:00",
+      "ts_end": "2026-08-30T15:30:00+08:00",
+      "busy_gpus": 4,
+      "gpu_count": 8,
+      "power_kw": 3.85,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:30:00+08:00",
+      "ts_end": "2026-08-30T15:31:00+08:00",
+      "busy_gpus": 4,
+      "gpu_count": 8,
+      "power_kw": 3.85,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:31:00+08:00",
+      "ts_end": "2026-08-30T15:32:00+08:00",
+      "busy_gpus": 4,
+      "gpu_count": 8,
+      "power_kw": 3.85,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:32:00+08:00",
+      "ts_end": "2026-08-30T15:33:00+08:00",
+      "busy_gpus": 4,
+      "gpu_count": 8,
+      "power_kw": 3.85,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:33:00+08:00",
+      "ts_end": "2026-08-30T15:34:00+08:00",
+      "busy_gpus": 4,
+      "gpu_count": 8,
+      "power_kw": 3.85,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:34:00+08:00",
+      "ts_end": "2026-08-30T15:35:00+08:00",
+      "busy_gpus": 4,
+      "gpu_count": 8,
+      "power_kw": 3.85,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:35:00+08:00",
+      "ts_end": "2026-08-30T15:36:00+08:00",
+      "busy_gpus": 4,
+      "gpu_count": 8,
+      "power_kw": 3.85,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:36:00+08:00",
+      "ts_end": "2026-08-30T15:37:00+08:00",
+      "busy_gpus": 4,
+      "gpu_count": 8,
+      "power_kw": 3.85,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:37:00+08:00",
+      "ts_end": "2026-08-30T15:38:00+08:00",
+      "busy_gpus": 4,
+      "gpu_count": 8,
+      "power_kw": 3.85,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:38:00+08:00",
+      "ts_end": "2026-08-30T15:39:00+08:00",
+      "busy_gpus": 4,
+      "gpu_count": 8,
+      "power_kw": 3.85,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:39:00+08:00",
+      "ts_end": "2026-08-30T15:40:00+08:00",
+      "busy_gpus": 4,
+      "gpu_count": 8,
+      "power_kw": 3.85,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:40:00+08:00",
+      "ts_end": "2026-08-30T15:41:00+08:00",
+      "busy_gpus": 4,
+      "gpu_count": 8,
+      "power_kw": 3.85,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:41:00+08:00",
+      "ts_end": "2026-08-30T15:42:00+08:00",
+      "busy_gpus": 4,
+      "gpu_count": 8,
+      "power_kw": 3.85,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:42:00+08:00",
+      "ts_end": "2026-08-30T15:43:00+08:00",
+      "busy_gpus": 4,
+      "gpu_count": 8,
+      "power_kw": 3.85,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:43:00+08:00",
+      "ts_end": "2026-08-30T15:44:00+08:00",
+      "busy_gpus": 4,
+      "gpu_count": 8,
+      "power_kw": 3.85,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:44:00+08:00",
+      "ts_end": "2026-08-30T15:45:00+08:00",
+      "busy_gpus": 4,
+      "gpu_count": 8,
+      "power_kw": 3.85,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:45:00+08:00",
+      "ts_end": "2026-08-30T15:46:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.2,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:46:00+08:00",
+      "ts_end": "2026-08-30T15:47:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.2,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:47:00+08:00",
+      "ts_end": "2026-08-30T15:48:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 6.5,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:48:00+08:00",
+      "ts_end": "2026-08-30T15:49:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 6.5,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:49:00+08:00",
+      "ts_end": "2026-08-30T15:50:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 6.5,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:50:00+08:00",
+      "ts_end": "2026-08-30T15:51:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 6.5,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:51:00+08:00",
+      "ts_end": "2026-08-30T15:52:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 6.5,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:52:00+08:00",
+      "ts_end": "2026-08-30T15:53:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 6.5,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:53:00+08:00",
+      "ts_end": "2026-08-30T15:54:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 6.5,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:54:00+08:00",
+      "ts_end": "2026-08-30T15:55:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 6.5,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:55:00+08:00",
+      "ts_end": "2026-08-30T15:56:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 6.5,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:56:00+08:00",
+      "ts_end": "2026-08-30T15:57:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 6.5,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:57:00+08:00",
+      "ts_end": "2026-08-30T15:58:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 6.5,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:58:00+08:00",
+      "ts_end": "2026-08-30T15:59:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 6.5,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-01",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:59:00+08:00",
+      "ts_end": "2026-08-30T16:00:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 6.5,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:00:00+08:00",
+      "ts_end": "2026-08-30T15:01:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.2,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:01:00+08:00",
+      "ts_end": "2026-08-30T15:02:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.2,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:02:00+08:00",
+      "ts_end": "2026-08-30T15:03:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.2,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:03:00+08:00",
+      "ts_end": "2026-08-30T15:04:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.2,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:04:00+08:00",
+      "ts_end": "2026-08-30T15:05:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.2,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:05:00+08:00",
+      "ts_end": "2026-08-30T15:06:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 8,
+      "power_kw": 1.8625,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:06:00+08:00",
+      "ts_end": "2026-08-30T15:07:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 8,
+      "power_kw": 1.8625,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:07:00+08:00",
+      "ts_end": "2026-08-30T15:08:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 8,
+      "power_kw": 1.8625,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:08:00+08:00",
+      "ts_end": "2026-08-30T15:09:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 8,
+      "power_kw": 1.8625,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:09:00+08:00",
+      "ts_end": "2026-08-30T15:10:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 8,
+      "power_kw": 1.8625,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:10:00+08:00",
+      "ts_end": "2026-08-30T15:11:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 8,
+      "power_kw": 1.8625,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:11:00+08:00",
+      "ts_end": "2026-08-30T15:12:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 8,
+      "power_kw": 1.8625,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:12:00+08:00",
+      "ts_end": "2026-08-30T15:13:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 8,
+      "power_kw": 1.8625,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:13:00+08:00",
+      "ts_end": "2026-08-30T15:14:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 8,
+      "power_kw": 1.8625,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:14:00+08:00",
+      "ts_end": "2026-08-30T15:15:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 8,
+      "power_kw": 1.8625,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:15:00+08:00",
+      "ts_end": "2026-08-30T15:16:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 8,
+      "power_kw": 1.8625,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:16:00+08:00",
+      "ts_end": "2026-08-30T15:17:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 8,
+      "power_kw": 1.8625,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:17:00+08:00",
+      "ts_end": "2026-08-30T15:18:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 8,
+      "power_kw": 1.8625,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:18:00+08:00",
+      "ts_end": "2026-08-30T15:19:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 8,
+      "power_kw": 1.8625,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:19:00+08:00",
+      "ts_end": "2026-08-30T15:20:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.2,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:20:00+08:00",
+      "ts_end": "2026-08-30T15:21:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.2,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:21:00+08:00",
+      "ts_end": "2026-08-30T15:22:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.2,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:22:00+08:00",
+      "ts_end": "2026-08-30T15:23:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.2,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:23:00+08:00",
+      "ts_end": "2026-08-30T15:24:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.2,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:24:00+08:00",
+      "ts_end": "2026-08-30T15:25:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.2,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:25:00+08:00",
+      "ts_end": "2026-08-30T15:26:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.2,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:26:00+08:00",
+      "ts_end": "2026-08-30T15:27:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.2,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:27:00+08:00",
+      "ts_end": "2026-08-30T15:28:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.2,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:28:00+08:00",
+      "ts_end": "2026-08-30T15:29:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.2,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:29:00+08:00",
+      "ts_end": "2026-08-30T15:30:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.2,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:30:00+08:00",
+      "ts_end": "2026-08-30T15:31:00+08:00",
+      "busy_gpus": 2,
+      "gpu_count": 8,
+      "power_kw": 2.525,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:31:00+08:00",
+      "ts_end": "2026-08-30T15:32:00+08:00",
+      "busy_gpus": 2,
+      "gpu_count": 8,
+      "power_kw": 2.525,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:32:00+08:00",
+      "ts_end": "2026-08-30T15:33:00+08:00",
+      "busy_gpus": 2,
+      "gpu_count": 8,
+      "power_kw": 2.525,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:33:00+08:00",
+      "ts_end": "2026-08-30T15:34:00+08:00",
+      "busy_gpus": 2,
+      "gpu_count": 8,
+      "power_kw": 2.525,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:34:00+08:00",
+      "ts_end": "2026-08-30T15:35:00+08:00",
+      "busy_gpus": 2,
+      "gpu_count": 8,
+      "power_kw": 2.525,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:35:00+08:00",
+      "ts_end": "2026-08-30T15:36:00+08:00",
+      "busy_gpus": 2,
+      "gpu_count": 8,
+      "power_kw": 2.525,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:36:00+08:00",
+      "ts_end": "2026-08-30T15:37:00+08:00",
+      "busy_gpus": 2,
+      "gpu_count": 8,
+      "power_kw": 2.525,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:37:00+08:00",
+      "ts_end": "2026-08-30T15:38:00+08:00",
+      "busy_gpus": 2,
+      "gpu_count": 8,
+      "power_kw": 2.525,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:38:00+08:00",
+      "ts_end": "2026-08-30T15:39:00+08:00",
+      "busy_gpus": 2,
+      "gpu_count": 8,
+      "power_kw": 2.525,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:39:00+08:00",
+      "ts_end": "2026-08-30T15:40:00+08:00",
+      "busy_gpus": 2,
+      "gpu_count": 8,
+      "power_kw": 2.525,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:40:00+08:00",
+      "ts_end": "2026-08-30T15:41:00+08:00",
+      "busy_gpus": 2,
+      "gpu_count": 8,
+      "power_kw": 2.525,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:41:00+08:00",
+      "ts_end": "2026-08-30T15:42:00+08:00",
+      "busy_gpus": 2,
+      "gpu_count": 8,
+      "power_kw": 2.525,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:42:00+08:00",
+      "ts_end": "2026-08-30T15:43:00+08:00",
+      "busy_gpus": 2,
+      "gpu_count": 8,
+      "power_kw": 2.525,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:43:00+08:00",
+      "ts_end": "2026-08-30T15:44:00+08:00",
+      "busy_gpus": 2,
+      "gpu_count": 8,
+      "power_kw": 2.525,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:44:00+08:00",
+      "ts_end": "2026-08-30T15:45:00+08:00",
+      "busy_gpus": 2,
+      "gpu_count": 8,
+      "power_kw": 2.525,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:45:00+08:00",
+      "ts_end": "2026-08-30T15:46:00+08:00",
+      "busy_gpus": 2,
+      "gpu_count": 8,
+      "power_kw": 2.525,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:46:00+08:00",
+      "ts_end": "2026-08-30T15:47:00+08:00",
+      "busy_gpus": 2,
+      "gpu_count": 8,
+      "power_kw": 2.525,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:47:00+08:00",
+      "ts_end": "2026-08-30T15:48:00+08:00",
+      "busy_gpus": 2,
+      "gpu_count": 8,
+      "power_kw": 2.525,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:48:00+08:00",
+      "ts_end": "2026-08-30T15:49:00+08:00",
+      "busy_gpus": 2,
+      "gpu_count": 8,
+      "power_kw": 2.525,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:49:00+08:00",
+      "ts_end": "2026-08-30T15:50:00+08:00",
+      "busy_gpus": 2,
+      "gpu_count": 8,
+      "power_kw": 2.525,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:50:00+08:00",
+      "ts_end": "2026-08-30T15:51:00+08:00",
+      "busy_gpus": 2,
+      "gpu_count": 8,
+      "power_kw": 2.525,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:51:00+08:00",
+      "ts_end": "2026-08-30T15:52:00+08:00",
+      "busy_gpus": 2,
+      "gpu_count": 8,
+      "power_kw": 2.525,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:52:00+08:00",
+      "ts_end": "2026-08-30T15:53:00+08:00",
+      "busy_gpus": 2,
+      "gpu_count": 8,
+      "power_kw": 2.525,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:53:00+08:00",
+      "ts_end": "2026-08-30T15:54:00+08:00",
+      "busy_gpus": 2,
+      "gpu_count": 8,
+      "power_kw": 2.525,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:54:00+08:00",
+      "ts_end": "2026-08-30T15:55:00+08:00",
+      "busy_gpus": 2,
+      "gpu_count": 8,
+      "power_kw": 2.525,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:55:00+08:00",
+      "ts_end": "2026-08-30T15:56:00+08:00",
+      "busy_gpus": 2,
+      "gpu_count": 8,
+      "power_kw": 2.525,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:56:00+08:00",
+      "ts_end": "2026-08-30T15:57:00+08:00",
+      "busy_gpus": 2,
+      "gpu_count": 8,
+      "power_kw": 2.525,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:57:00+08:00",
+      "ts_end": "2026-08-30T15:58:00+08:00",
+      "busy_gpus": 2,
+      "gpu_count": 8,
+      "power_kw": 2.525,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:58:00+08:00",
+      "ts_end": "2026-08-30T15:59:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.2,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-02",
+      "server_model": "SKU-A/8xH100",
+      "ts_start": "2026-08-30T15:59:00+08:00",
+      "ts_end": "2026-08-30T16:00:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.2,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:00:00+08:00",
+      "ts_end": "2026-08-30T15:01:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.0,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:01:00+08:00",
+      "ts_end": "2026-08-30T15:02:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.0,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:02:00+08:00",
+      "ts_end": "2026-08-30T15:03:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.0,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:03:00+08:00",
+      "ts_end": "2026-08-30T15:04:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.0,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:04:00+08:00",
+      "ts_end": "2026-08-30T15:05:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.0,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:05:00+08:00",
+      "ts_end": "2026-08-30T15:06:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.0,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:06:00+08:00",
+      "ts_end": "2026-08-30T15:07:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.0,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:07:00+08:00",
+      "ts_end": "2026-08-30T15:08:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.0,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:08:00+08:00",
+      "ts_end": "2026-08-30T15:09:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.0,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:09:00+08:00",
+      "ts_end": "2026-08-30T15:10:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.0,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:10:00+08:00",
+      "ts_end": "2026-08-30T15:11:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 4.8,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:11:00+08:00",
+      "ts_end": "2026-08-30T15:12:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 4.8,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:12:00+08:00",
+      "ts_end": "2026-08-30T15:13:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 4.8,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:13:00+08:00",
+      "ts_end": "2026-08-30T15:14:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 4.8,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:14:00+08:00",
+      "ts_end": "2026-08-30T15:15:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 4.8,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:15:00+08:00",
+      "ts_end": "2026-08-30T15:16:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 4.8,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:16:00+08:00",
+      "ts_end": "2026-08-30T15:17:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 4.8,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:17:00+08:00",
+      "ts_end": "2026-08-30T15:18:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 4.8,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:18:00+08:00",
+      "ts_end": "2026-08-30T15:19:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 4.8,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:19:00+08:00",
+      "ts_end": "2026-08-30T15:20:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 4.8,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:20:00+08:00",
+      "ts_end": "2026-08-30T15:21:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": null,
+      "value_status": "absent",
+      "absent_reason": "BMC unreachable, no power samples",
+      "scope": "device=srv-03"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:21:00+08:00",
+      "ts_end": "2026-08-30T15:22:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": null,
+      "value_status": "absent",
+      "absent_reason": "BMC unreachable, no power samples",
+      "scope": "device=srv-03"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:22:00+08:00",
+      "ts_end": "2026-08-30T15:23:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": null,
+      "value_status": "absent",
+      "absent_reason": "BMC unreachable, no power samples",
+      "scope": "device=srv-03"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:23:00+08:00",
+      "ts_end": "2026-08-30T15:24:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": null,
+      "value_status": "absent",
+      "absent_reason": "BMC unreachable, no power samples",
+      "scope": "device=srv-03"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:24:00+08:00",
+      "ts_end": "2026-08-30T15:25:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": null,
+      "value_status": "absent",
+      "absent_reason": "BMC unreachable, no power samples",
+      "scope": "device=srv-03"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:25:00+08:00",
+      "ts_end": "2026-08-30T15:26:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": null,
+      "value_status": "absent",
+      "absent_reason": "BMC unreachable, no power samples",
+      "scope": "device=srv-03"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:26:00+08:00",
+      "ts_end": "2026-08-30T15:27:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": null,
+      "value_status": "absent",
+      "absent_reason": "BMC unreachable, no power samples",
+      "scope": "device=srv-03"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:27:00+08:00",
+      "ts_end": "2026-08-30T15:28:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": null,
+      "value_status": "absent",
+      "absent_reason": "BMC unreachable, no power samples",
+      "scope": "device=srv-03"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:28:00+08:00",
+      "ts_end": "2026-08-30T15:29:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": null,
+      "value_status": "absent",
+      "absent_reason": "BMC unreachable, no power samples",
+      "scope": "device=srv-03"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:29:00+08:00",
+      "ts_end": "2026-08-30T15:30:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": null,
+      "value_status": "absent",
+      "absent_reason": "BMC unreachable, no power samples",
+      "scope": "device=srv-03"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:30:00+08:00",
+      "ts_end": "2026-08-30T15:31:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": null,
+      "value_status": "absent",
+      "absent_reason": "BMC unreachable, no power samples",
+      "scope": "device=srv-03"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:31:00+08:00",
+      "ts_end": "2026-08-30T15:32:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": null,
+      "value_status": "absent",
+      "absent_reason": "BMC unreachable, no power samples",
+      "scope": "device=srv-03"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:32:00+08:00",
+      "ts_end": "2026-08-30T15:33:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": null,
+      "value_status": "absent",
+      "absent_reason": "BMC unreachable, no power samples",
+      "scope": "device=srv-03"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:33:00+08:00",
+      "ts_end": "2026-08-30T15:34:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": null,
+      "value_status": "absent",
+      "absent_reason": "BMC unreachable, no power samples",
+      "scope": "device=srv-03"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:34:00+08:00",
+      "ts_end": "2026-08-30T15:35:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": null,
+      "value_status": "absent",
+      "absent_reason": "BMC unreachable, no power samples",
+      "scope": "device=srv-03"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:35:00+08:00",
+      "ts_end": "2026-08-30T15:36:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 4.8,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:36:00+08:00",
+      "ts_end": "2026-08-30T15:37:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 4.8,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:37:00+08:00",
+      "ts_end": "2026-08-30T15:38:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 4.8,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:38:00+08:00",
+      "ts_end": "2026-08-30T15:39:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 4.8,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:39:00+08:00",
+      "ts_end": "2026-08-30T15:40:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 4.8,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:40:00+08:00",
+      "ts_end": "2026-08-30T15:41:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 4.8,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:41:00+08:00",
+      "ts_end": "2026-08-30T15:42:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 4.8,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:42:00+08:00",
+      "ts_end": "2026-08-30T15:43:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 4.8,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:43:00+08:00",
+      "ts_end": "2026-08-30T15:44:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 4.8,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:44:00+08:00",
+      "ts_end": "2026-08-30T15:45:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 4.8,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:45:00+08:00",
+      "ts_end": "2026-08-30T15:46:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 4.8,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:46:00+08:00",
+      "ts_end": "2026-08-30T15:47:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 4.8,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:47:00+08:00",
+      "ts_end": "2026-08-30T15:48:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 4.8,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:48:00+08:00",
+      "ts_end": "2026-08-30T15:49:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 4.8,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:49:00+08:00",
+      "ts_end": "2026-08-30T15:50:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 4.8,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:50:00+08:00",
+      "ts_end": "2026-08-30T15:51:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 4.8,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:51:00+08:00",
+      "ts_end": "2026-08-30T15:52:00+08:00",
+      "busy_gpus": 8,
+      "gpu_count": 8,
+      "power_kw": 4.8,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:52:00+08:00",
+      "ts_end": "2026-08-30T15:53:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.0,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:53:00+08:00",
+      "ts_end": "2026-08-30T15:54:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.0,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:54:00+08:00",
+      "ts_end": "2026-08-30T15:55:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.0,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:55:00+08:00",
+      "ts_end": "2026-08-30T15:56:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.0,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:56:00+08:00",
+      "ts_end": "2026-08-30T15:57:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.0,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:57:00+08:00",
+      "ts_end": "2026-08-30T15:58:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.0,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:58:00+08:00",
+      "ts_end": "2026-08-30T15:59:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.0,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-03",
+      "server_model": "SKU-B/8xA100",
+      "ts_start": "2026-08-30T15:59:00+08:00",
+      "ts_end": "2026-08-30T16:00:00+08:00",
+      "busy_gpus": 0,
+      "gpu_count": 8,
+      "power_kw": 1.0,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:00:00+08:00",
+      "ts_end": "2026-08-30T15:01:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:01:00+08:00",
+      "ts_end": "2026-08-30T15:02:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:02:00+08:00",
+      "ts_end": "2026-08-30T15:03:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:03:00+08:00",
+      "ts_end": "2026-08-30T15:04:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:04:00+08:00",
+      "ts_end": "2026-08-30T15:05:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:05:00+08:00",
+      "ts_end": "2026-08-30T15:06:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:06:00+08:00",
+      "ts_end": "2026-08-30T15:07:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:07:00+08:00",
+      "ts_end": "2026-08-30T15:08:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:08:00+08:00",
+      "ts_end": "2026-08-30T15:09:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:09:00+08:00",
+      "ts_end": "2026-08-30T15:10:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:10:00+08:00",
+      "ts_end": "2026-08-30T15:11:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:11:00+08:00",
+      "ts_end": "2026-08-30T15:12:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:12:00+08:00",
+      "ts_end": "2026-08-30T15:13:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:13:00+08:00",
+      "ts_end": "2026-08-30T15:14:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:14:00+08:00",
+      "ts_end": "2026-08-30T15:15:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:15:00+08:00",
+      "ts_end": "2026-08-30T15:16:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:16:00+08:00",
+      "ts_end": "2026-08-30T15:17:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:17:00+08:00",
+      "ts_end": "2026-08-30T15:18:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:18:00+08:00",
+      "ts_end": "2026-08-30T15:19:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:19:00+08:00",
+      "ts_end": "2026-08-30T15:20:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:20:00+08:00",
+      "ts_end": "2026-08-30T15:21:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:21:00+08:00",
+      "ts_end": "2026-08-30T15:22:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:22:00+08:00",
+      "ts_end": "2026-08-30T15:23:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:23:00+08:00",
+      "ts_end": "2026-08-30T15:24:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:24:00+08:00",
+      "ts_end": "2026-08-30T15:25:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:25:00+08:00",
+      "ts_end": "2026-08-30T15:26:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:26:00+08:00",
+      "ts_end": "2026-08-30T15:27:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:27:00+08:00",
+      "ts_end": "2026-08-30T15:28:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:28:00+08:00",
+      "ts_end": "2026-08-30T15:29:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:29:00+08:00",
+      "ts_end": "2026-08-30T15:30:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:30:00+08:00",
+      "ts_end": "2026-08-30T15:31:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:31:00+08:00",
+      "ts_end": "2026-08-30T15:32:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:32:00+08:00",
+      "ts_end": "2026-08-30T15:33:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:33:00+08:00",
+      "ts_end": "2026-08-30T15:34:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:34:00+08:00",
+      "ts_end": "2026-08-30T15:35:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:35:00+08:00",
+      "ts_end": "2026-08-30T15:36:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:36:00+08:00",
+      "ts_end": "2026-08-30T15:37:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:37:00+08:00",
+      "ts_end": "2026-08-30T15:38:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:38:00+08:00",
+      "ts_end": "2026-08-30T15:39:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:39:00+08:00",
+      "ts_end": "2026-08-30T15:40:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:40:00+08:00",
+      "ts_end": "2026-08-30T15:41:00+08:00",
+      "busy_gpus": 3,
+      "gpu_count": 4,
+      "power_kw": 1.475,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:41:00+08:00",
+      "ts_end": "2026-08-30T15:42:00+08:00",
+      "busy_gpus": 3,
+      "gpu_count": 4,
+      "power_kw": 1.475,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:42:00+08:00",
+      "ts_end": "2026-08-30T15:43:00+08:00",
+      "busy_gpus": 3,
+      "gpu_count": 4,
+      "power_kw": 1.475,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:43:00+08:00",
+      "ts_end": "2026-08-30T15:44:00+08:00",
+      "busy_gpus": 3,
+      "gpu_count": 4,
+      "power_kw": 1.475,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:44:00+08:00",
+      "ts_end": "2026-08-30T15:45:00+08:00",
+      "busy_gpus": 3,
+      "gpu_count": 4,
+      "power_kw": 1.475,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:45:00+08:00",
+      "ts_end": "2026-08-30T15:46:00+08:00",
+      "busy_gpus": 3,
+      "gpu_count": 4,
+      "power_kw": 1.475,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:46:00+08:00",
+      "ts_end": "2026-08-30T15:47:00+08:00",
+      "busy_gpus": 3,
+      "gpu_count": 4,
+      "power_kw": 1.475,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:47:00+08:00",
+      "ts_end": "2026-08-30T15:48:00+08:00",
+      "busy_gpus": 3,
+      "gpu_count": 4,
+      "power_kw": 1.475,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:48:00+08:00",
+      "ts_end": "2026-08-30T15:49:00+08:00",
+      "busy_gpus": 3,
+      "gpu_count": 4,
+      "power_kw": 1.475,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:49:00+08:00",
+      "ts_end": "2026-08-30T15:50:00+08:00",
+      "busy_gpus": 3,
+      "gpu_count": 4,
+      "power_kw": 1.475,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:50:00+08:00",
+      "ts_end": "2026-08-30T15:51:00+08:00",
+      "busy_gpus": 3,
+      "gpu_count": 4,
+      "power_kw": 1.475,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:51:00+08:00",
+      "ts_end": "2026-08-30T15:52:00+08:00",
+      "busy_gpus": 3,
+      "gpu_count": 4,
+      "power_kw": 1.475,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:52:00+08:00",
+      "ts_end": "2026-08-30T15:53:00+08:00",
+      "busy_gpus": 3,
+      "gpu_count": 4,
+      "power_kw": 1.475,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:53:00+08:00",
+      "ts_end": "2026-08-30T15:54:00+08:00",
+      "busy_gpus": 3,
+      "gpu_count": 4,
+      "power_kw": 1.475,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:54:00+08:00",
+      "ts_end": "2026-08-30T15:55:00+08:00",
+      "busy_gpus": 3,
+      "gpu_count": 4,
+      "power_kw": 1.475,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:55:00+08:00",
+      "ts_end": "2026-08-30T15:56:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:56:00+08:00",
+      "ts_end": "2026-08-30T15:57:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:57:00+08:00",
+      "ts_end": "2026-08-30T15:58:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:58:00+08:00",
+      "ts_end": "2026-08-30T15:59:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    },
+    {
+      "device_id": "srv-04",
+      "server_model": "SKU-C/4xL40S",
+      "ts_start": "2026-08-30T15:59:00+08:00",
+      "ts_end": "2026-08-30T16:00:00+08:00",
+      "busy_gpus": 1,
+      "gpu_count": 4,
+      "power_kw": 0.825,
+      "value_status": "measured"
+    }
+  ],
+  "grid": {
+    "hour_start": "2026-08-30T15:00:00+08:00",
+    "mix_pct": {
+      "hydro": 62.0,
+      "wind": 8.0,
+      "solar": 11.0,
+      "thermal": 19.0
+    },
+    "ef_gco2e_per_kwh": 280.0,
+    "ef_source": "PLACEHOLDER - not a real published factor",
+    "ef_granularity_s": 3600
+  }
+}

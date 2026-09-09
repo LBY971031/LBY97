@@ -1,0 +1,18 @@
+# 密钥：绝不提交
+.env
+.env.*
+*.key
+secrets/
+
+# 本地数据与产物
+data/
+*.db
+*.sqlite3
+logs/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/

@@ -159,7 +159,7 @@ class AbsentRange:
     reason: str
     ts_from: str | None = None
     ts_to: str | None = None
-    scope: str | None = None
+    scope: dict[str, str] | None = None
 
 
 @dataclass
@@ -227,8 +227,7 @@ FORBIDDEN = {
     "rack_location", "room_address", "contract_no", "raw_file_path",
     "token_log_detail",
 }
-PSEUDONYM = {"job_name": "job", "model_id": "model",
-             "server_model": "sku", "device_id": "node"}
+PSEUDONYM = {"job_name": "job", "device_id": "node"}
 
 GAP_MARK = "\n\n[DATA GAPS]"
 _GAP_NOTICE = GAP_MARK + (
@@ -255,27 +254,34 @@ def _scrub(obj):
     return obj
 
 
+def _gap_line(a: dict) -> str:
+    scope = a.get("scope") or {}
+    label = "[" + ", ".join(f"{k}={v}" for k, v in scope.items()) + "] " if scope else ""
+    span = (f"{a['ts_from']} ~ {a['ts_to']}" if a.get("ts_from")
+            else "(all periods)")
+    return f"  - {label}{span}: {a['reason']}"
+
+
 def filter_outbound(env: ToolEnvelope) -> str:
-    text = json.dumps(_scrub(env.to_dict()), ensure_ascii=False, default=str)
-    if env.absent_ranges:
-        lines = [
-            f"  - {('[' + a.scope + '] ') if a.scope else ''}"
-            f"{(a.ts_from + ' ~ ' + a.ts_to) if a.ts_from else '(all periods)'}"
-            f": {a.reason}"
-            for a in env.absent_ranges
-        ]
-        text += _GAP_NOTICE.format(gaps="\n".join(lines))
+    payload = _scrub(env.to_dict())
+    text = json.dumps(payload, ensure_ascii=False, default=str)
+    gaps = payload.get("absent_ranges") or []
+    if gaps:
+        text += _GAP_NOTICE.format(gaps="\n".join(_gap_line(a) for a in gaps))
     return text
 
 
 def assert_no_leak(text: str) -> None:
     if re.search(r"\b\d{1,3}(?:\.\d{1,3}){3}\b", text):
         raise ValueError("boundary: outbound text may contain an IP")
-    if re.search(r"\b[0-9a-fA-F]{16,}\b", text):
-        raise ValueError("boundary: outbound text may contain a serial number")
+    for m in re.finditer(r"\b[0-9a-fA-F]{16,}\b", text):
+        if any(c in "abcdefABCDEF" for c in m.group(0)):
+            raise ValueError("boundary: outbound text may contain a serial number")
 ```
 
-<span style="color:#888">（全部 SubAgent 共用这一个出口，任何 Agent 不得自带过滤逻辑——多套规则必然出现漏洞。禁发字段直接剔除、不留占位；标识类字段做稳定脱敏，同一台机器每次得到同一代号，便于跨轮次对照。有缺口就把禁令写进出网文本，而不是指望提示词记得住。`assert_no_leak` 是兜底：宁可中断，不可泄露。）</span>
+<span style="color:#888">（全部 SubAgent 共用这一个出口，任何 Agent 不得自带过滤逻辑——多套规则必然出现漏洞。禁发字段直接剔除、不留占位；标识类字段做稳定脱敏，同一台机器每次得到同一代号，便于跨轮次对照。**脱敏名单只放身份类字段。** `model_id`（Qwen2.5-72B 之类）和 `server_model`（8xH100）曾在名单里，实跑后移出——它们是公开的型号名而非身份，脱敏之后「哪个模型能耗最高」这个问题就没法用人话回答了，报告随之失去意义。有缺口就把禁令写进出网文本，而不是指望提示词记得住。`assert_no_leak` 是兜底：宁可中断，不可泄露。）</span>
+
+<span style="color:#888">（序列号那条要求命中串里**至少有一个字母** a–f。实跑时它曾被 `0.39999999999999997` 这样的浮点噪声触发——数字也是合法的十六进制字符，17 位小数尾巴就满足了 16 位阈值，正常报告因此被拦下。代价是纯数字的序列号会漏过，所以真正的防线始终是 `FORBIDDEN` 名单，这条只是兜底。）</span>
 
 ---
 
