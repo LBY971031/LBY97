@@ -58,6 +58,9 @@ def filter_outbound(env: ToolEnvelope) -> str:
 def assert_no_leak(text: str) -> None:
     if re.search(r"\b\d{1,3}(?:\.\d{1,3}){3}\b", text):
         raise ValueError("boundary: outbound text may contain an IP")
+    # IPv6：至少四段十六进制并含 ::，避免误伤 Python 切片或普通冒号文本
+    if re.search(r"\b[0-9a-fA-F]{1,4}(?::[0-9a-fA-F]{0,4}){3,7}\b", text):
+        raise ValueError("boundary: outbound text may contain an IPv6 address")
     for m in re.finditer(r"\b[0-9a-fA-F]{16,}\b", text):
         if any(c in "abcdefABCDEF" for c in m.group(0)):
             raise ValueError("boundary: outbound text may contain a serial number")

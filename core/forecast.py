@@ -52,9 +52,15 @@ def intensity_baseline(hour_start: str) -> dict:
     # 完全没有任何能耗数据的模型（不是部分缺）
     missing = sorted({m for m in excluded
                       if m not in {p["model_id"] for p in points}})
+    # 闸一：被排除的任务必须显式列出，只把 status 标成 partial 等于没说
+    gaps = [{"model_id": t["model_id"], "value_status": "absent",
+             "absent_reason": "task ran on a server with no power samples",
+             "scope": {"model_id": t["model_id"], "task_id": tid}}
+            for tid, t in tasks.items() if tid not in alloc]
+
     points.sort(key=lambda p: -(p["kwh_per_mtok"] or 0))
     return {
-        "points": points,
+        "points": points + gaps,
         "models_without_any_energy": missing,
         "tasks_excluded_total": sum(excluded.values()),
         "expected": len({t["model_id"] for t in tasks.values()}),
@@ -70,12 +76,13 @@ def forecast_energy(hour_start: str, planned_mtokens: dict[str, float]) -> dict:
     planned_mtokens: {model_id: millions of tokens}. A model with no observed
     intensity yields an absent row, never a guessed one.
     """
-    base = {p["model_id"]: p for p in intensity_baseline(hour_start)["points"]}
+    base = {p["model_id"]: p for p in intensity_baseline(hour_start)["points"]
+            if p.get("kwh_per_mtok") is not None}
 
     rows = []
     for model, mtok in planned_mtokens.items():
         b = base.get(model)
-        if b is None or b["kwh_per_mtok"] is None:
+        if b is None or b.get("kwh_per_mtok") is None:
             rows.append({"model_id": model, "planned_mtokens": mtok,
                          "forecast_kwh": None, "value_status": "absent",
                          "absent_reason": "no observed intensity for this model",

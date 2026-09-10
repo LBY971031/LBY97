@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 DB_PATH = Path("data/app.db")
@@ -26,8 +27,21 @@ def connect(path: Path = DB_PATH) -> sqlite3.Connection:
     return conn
 
 
+TZ = timezone(timedelta(hours=8))          # 入库统一到这个偏移
+
+
+def _normalise_hour(value: str) -> str:
+    """Force one timezone offset so range queries can compare as strings.
+
+    2026-08-30T15:00:00+08:00 and 2026-08-30T07:00:00Z are the same instant
+    but sort differently as text, which would split one hour into two rows.
+    """
+    return datetime.fromisoformat(value).astimezone(TZ).isoformat()
+
+
 def save(conn: sqlite3.Connection, payload: dict) -> int:
     """Append a new version of one hour's report. Never overwrites."""
+    payload = dict(payload, hour_start=_normalise_hour(payload["hour_start"]))
     hour = payload["hour_start"]
     prev = conn.execute(
         "SELECT MAX(version) FROM hourly_report WHERE hour_start = ?", (hour,)
@@ -46,6 +60,7 @@ def save(conn: sqlite3.Connection, payload: dict) -> int:
 
 
 def load(conn, hour_start: str, version: int | None = None) -> dict | None:
+    hour_start = _normalise_hour(hour_start)
     if version is None:
         sql = ("SELECT payload FROM hourly_report"
                " WHERE hour_start = ? AND superseded = 0")
@@ -58,6 +73,7 @@ def load(conn, hour_start: str, version: int | None = None) -> dict | None:
 
 
 def load_range(conn, ts_from: str, ts_to: str) -> list[dict]:
+    ts_from, ts_to = _normalise_hour(ts_from), _normalise_hour(ts_to)
     rows = conn.execute(
         "SELECT payload FROM hourly_report"
         " WHERE hour_start >= ? AND hour_start < ? AND superseded = 0"

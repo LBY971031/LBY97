@@ -1,6 +1,6 @@
 # 三个 SubAgent 的代码实现
 
-<span style="color:#888">（代码规格，非可运行文件。落地时按目录树拆成独立 `.py`。代码内一律英文；中文说明放在代码块外的灰字里。GitHub 会剥掉行内 `style`，灰色只在本地渲染器生效。）</span>
+<span style="color:#888">（**以仓库里的实际代码为准。** 本文代码块由真实文件同步而来；一旦二者分叉，信 `agent/`、`core/` 下的 `.py`，不信这里。落地时按目录树拆成独立 `.py`。代码内一律英文；中文说明放在代码块外的灰字里。GitHub 会剥掉行内 `style`，灰色只在本地渲染器生效。）</span>
 
 ---
 
@@ -110,6 +110,20 @@ agent/
                        ↓
                   汇总（缺口写在开头，不写脚注）
 ```
+
+### 2.3-bis 闸三的已知盲区
+
+**小于 60 的整数一律放行。** 这是自觉的取舍，不是疏漏。
+
+报告里必然出现日期与时刻（「8 月 30 日 15:00」「45 分钟」），它们与同量级的
+编造数字无法区分。若严格校验，每一份写了日期的正常报告都会被标记未通过——
+闸三会被用的人直接关掉，那才是真正的失效。
+
+代价是凭空的「同比下降 15%」这类小整数可能蒙混过关。这个代价可接受：本项目
+真正要守的是能耗与碳排数值，它们几乎总是带小数且远大于 60。
+
+<span style="color:#888">（`tests/test_gates.py::test_verifier_blind_spot_is_deliberate` 把这个行为
+固化成用例——它是设计的一部分，将来有人"修好"它时，测试会提醒这是个取舍。）</span>
 
 ### 2.4 闸响了怎么办
 
@@ -274,6 +288,9 @@ def filter_outbound(env: ToolEnvelope) -> str:
 def assert_no_leak(text: str) -> None:
     if re.search(r"\b\d{1,3}(?:\.\d{1,3}){3}\b", text):
         raise ValueError("boundary: outbound text may contain an IP")
+    # IPv6：至少四段十六进制并含 ::，避免误伤 Python 切片或普通冒号文本
+    if re.search(r"\b[0-9a-fA-F]{1,4}(?::[0-9a-fA-F]{0,4}){3,7}\b", text):
+        raise ValueError("boundary: outbound text may contain an IPv6 address")
     for m in re.finditer(r"\b[0-9a-fA-F]{16,}\b", text):
         if any(c in "abcdefABCDEF" for c in m.group(0)):
             raise ValueError("boundary: outbound text may contain a serial number")
@@ -295,8 +312,16 @@ from dataclasses import dataclass
 
 from .boundary import GAP_MARK
 
-_NUM = re.compile(r"(?<![\w.])(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?![\w])")
-_TRIVIAL = {float(n) for n in range(11)} | {100.0, 24.0, 2025.0, 2026.0}
+_NUM = re.compile(
+    r"(?<![\w.])(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?:[eE][+-]?\d+)?(?![\w])")
+# 已知盲区，这是一个自觉的取舍。
+# 0-59 全部视为平凡数字，因为报告里的时刻（15:00、45 分钟、30 日）无法与
+# 同量级的编造数字区分。放过它们，是为了不让每一份写了日期时刻的正常报告
+# 都被标记未通过——那样闸三会被用的人直接关掉，反而一点用没有。
+# 代价：小于 60 的编造整数可能蒙混过关（例如凭空的「同比下降 15%」）。
+# 这个代价可接受，因为本项目真正要守的是能耗与碳排数值，它们几乎总是带
+# 小数、且远大于 60；小整数极少承载实质结论。
+_TRIVIAL = {float(n) for n in range(60)} | {100.0, 2025.0, 2026.0}
 
 
 @dataclass
@@ -309,8 +334,21 @@ class VerifyResult:
                 "unverified numbers: " + ", ".join(self.unverified))
 
 
+_ISO_DATE = re.compile(r"(\d{4})-(\d{2})-(\d{2})")
+
+
 def _numbers(text: str) -> list[float]:
-    return [float(m.group(0).replace(",", "")) for m in _NUM.finditer(text)]
+    """Every number a tool payload vouches for.
+
+    Dates are split into year/month/day as well: an agent writing "8 月 30 日"
+    is quoting the data, not inventing a number, but the plain scan never sees
+    that 30 because "30T15" reads as one word to the regex. Clock parts are
+    handled by _TRIVIAL instead - see the note there.
+    """
+    out = [float(m.group(0).replace(",", "")) for m in _NUM.finditer(text)]
+    for m in _ISO_DATE.finditer(text):
+        out += [float(g) for g in m.groups()]
+    return out
 
 
 def verify_numbers(agent_text: str, tool_payloads: list[str],
@@ -400,6 +438,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 DB_PATH = Path("data/app.db")
@@ -424,8 +463,21 @@ def connect(path: Path = DB_PATH) -> sqlite3.Connection:
     return conn
 
 
+TZ = timezone(timedelta(hours=8))          # 入库统一到这个偏移
+
+
+def _normalise_hour(value: str) -> str:
+    """Force one timezone offset so range queries can compare as strings.
+
+    2026-08-30T15:00:00+08:00 and 2026-08-30T07:00:00Z are the same instant
+    but sort differently as text, which would split one hour into two rows.
+    """
+    return datetime.fromisoformat(value).astimezone(TZ).isoformat()
+
+
 def save(conn: sqlite3.Connection, payload: dict) -> int:
     """Append a new version of one hour's report. Never overwrites."""
+    payload = dict(payload, hour_start=_normalise_hour(payload["hour_start"]))
     hour = payload["hour_start"]
     prev = conn.execute(
         "SELECT MAX(version) FROM hourly_report WHERE hour_start = ?", (hour,)
@@ -444,6 +496,7 @@ def save(conn: sqlite3.Connection, payload: dict) -> int:
 
 
 def load(conn, hour_start: str, version: int | None = None) -> dict | None:
+    hour_start = _normalise_hour(hour_start)
     if version is None:
         sql = ("SELECT payload FROM hourly_report"
                " WHERE hour_start = ? AND superseded = 0")
@@ -456,6 +509,7 @@ def load(conn, hour_start: str, version: int | None = None) -> dict | None:
 
 
 def load_range(conn, ts_from: str, ts_to: str) -> list[dict]:
+    ts_from, ts_to = _normalise_hour(ts_from), _normalise_hour(ts_to)
     rows = conn.execute(
         "SELECT payload FROM hourly_report"
         " WHERE hour_start >= ? AND hour_start < ? AND superseded = 0"

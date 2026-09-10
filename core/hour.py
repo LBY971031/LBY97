@@ -120,17 +120,26 @@ def grid_hour(hour_start: str) -> dict:
             "expected": 1, "grade": "B"}
 
 
-def carbon_hour(hour_start: str) -> dict:
+def carbon_hour(hour_start: str, *, region: str = "CN-SC") -> dict:
     """Operational carbon for the hour. Energy x hourly grid factor.
 
     Carbon inherits the factor's granularity: it can be no finer than the
     hour, however finely the energy was metered.
     """
+    from . import factor as core_factor
+
     e = energy_by_server(hour_start)
     g = grid_hour(hour_start)
     if not g["points"]:
         return {"points": [], "expected": 1, "grade": "D"}
-    ef = g["points"][0]["ef_gco2e_per_kwh"]
+
+    # 因子只有一个入口：因子库。小时数据里的 ef_gco2e_per_kwh 仅供参考，
+    # 不参与计算——否则同一小时会从两条路径算出两个碳排。
+    fm = core_factor.match(region, hour_start)
+    ef = fm.get("selected_ef_gco2e_per_kwh")
+    if ef is None:
+        return {"points": [], "expected": 1, "grade": "D",
+                "reason": "no applicable emission factor"}
 
     rows = []
     for s in e["servers"]:
@@ -158,7 +167,10 @@ def carbon_hour(hour_start: str) -> dict:
             "value_status": "derived"})
 
     return {"points": rows, "per_task": per_task, "ef_gco2e_per_kwh": ef,
+            "factor_id": fm.get("selected_factor_id"),
             "expected": len(e["servers"]), "grade": "B",
             "caliber": {"scope": "operational only (Boundary A)",
                         "embodied_included": False,
+                        "factor_id": fm.get("selected_factor_id"),
+                        "factor_all_placeholder": fm.get("all_placeholder"),
                         "ef_granularity_s": 3600}}
