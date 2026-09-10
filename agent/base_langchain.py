@@ -11,9 +11,10 @@ dict, so agent/orchestrator.py works with either.
 """
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
-from langchain_anthropic import ChatAnthropic
+from langchain.chat_models import init_chat_model
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 from langchain_core.tools import StructuredTool
 from langgraph.prebuilt import create_react_agent
@@ -21,7 +22,10 @@ from langgraph.prebuilt import create_react_agent
 from .env import require_api_key
 from .verifier import verify_numbers
 
-MODEL = "claude-opus-5"
+# 换模型只改这一个字符串。init_chat_model 会按前缀推断 provider：
+#   "claude-*" -> anthropic，"gpt-*" -> openai，也可写成 "anthropic:claude-opus-5"
+# 或用环境变量 LC_MODEL 覆盖，代码一行不动。
+MODEL = os.environ.get("LC_MODEL", "claude-opus-5")
 PROMPT_DIR = Path(__file__).parent / "prompts"
 
 
@@ -62,10 +66,11 @@ class LangChainSubAgent:
 
     def __init__(self, model: str = MODEL, max_tokens: int = 16000):
         require_api_key()
-        llm = ChatAnthropic(
-            model=model,
+        llm = init_chat_model(
+            model,
             max_tokens=max_tokens,
-            thinking={"type": "adaptive"},
+            **({"thinking": {"type": "adaptive"}}
+               if model.startswith(("claude", "anthropic:")) else {}),
         )
         self.graph = create_react_agent(
             llm,
