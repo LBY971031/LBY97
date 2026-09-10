@@ -4,6 +4,6 @@ from .tools_hour import TOOLS_SUB2
 
 
 class Sub2LowCarbon(SubAgentBase):
-    name = "绿电与低碳"
+    name = "电力结构·因子匹配"
     prompt_file = "sub2_lowcarbon.md"
     tools = TOOLS_SUB2

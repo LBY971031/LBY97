@@ -1,0 +1,76 @@
+{
+  "_warning": "SYNTHETIC factor library for pipeline testing. The numeric values are invented and must never be cited in a report or a paper. Replace每一条 with a real, versioned factor before any external use.",
+  "_schema": {
+    "factor_id": "唯一标识",
+    "region": "适用地理范围",
+    "year": "适用年份",
+    "granularity_s": "时间粒度（3600 = 逐小时，31536000 = 年均）",
+    "scope": "operating_margin / build_margin / average / residual",
+    "ef_gco2e_per_kwh": "排放因子",
+    "source": "出处",
+    "published": "发布日期",
+    "status": "placeholder = 数值为编造，real = 来自真实发布"
+  },
+  "factors": [
+    {
+      "factor_id": "CN-SC-HOURLY-2026",
+      "region": "CN-SC",
+      "region_name": "四川省电网",
+      "year": 2026,
+      "granularity_s": 3600,
+      "scope": "average",
+      "ef_gco2e_per_kwh": 280.0,
+      "source": "省级电网逐小时因子（占位）",
+      "published": "2026-07-01",
+      "status": "placeholder"
+    },
+    {
+      "factor_id": "CN-SC-ANNUAL-2025",
+      "region": "CN-SC",
+      "region_name": "四川省电网",
+      "year": 2025,
+      "granularity_s": 31536000,
+      "scope": "average",
+      "ef_gco2e_per_kwh": 310.0,
+      "source": "省级年均因子（占位）",
+      "published": "2026-03-15",
+      "status": "placeholder"
+    },
+    {
+      "factor_id": "CN-CSG-ANNUAL-2025",
+      "region": "CN-CSG",
+      "region_name": "南方区域电网",
+      "year": 2025,
+      "granularity_s": 31536000,
+      "scope": "average",
+      "ef_gco2e_per_kwh": 512.0,
+      "source": "区域电网年均因子（占位）",
+      "published": "2026-02-20",
+      "status": "placeholder"
+    },
+    {
+      "factor_id": "CN-NATIONAL-ANNUAL-2025",
+      "region": "CN",
+      "region_name": "全国电网",
+      "year": 2025,
+      "granularity_s": 31536000,
+      "scope": "average",
+      "ef_gco2e_per_kwh": 558.0,
+      "source": "全国电网年均因子（占位）",
+      "published": "2026-01-10",
+      "status": "placeholder"
+    },
+    {
+      "factor_id": "CN-SC-OM-2025",
+      "region": "CN-SC",
+      "region_name": "四川省电网",
+      "year": 2025,
+      "granularity_s": 31536000,
+      "scope": "operating_margin",
+      "ef_gco2e_per_kwh": 604.0,
+      "source": "电量边际排放因子（占位）",
+      "published": "2026-03-15",
+      "status": "placeholder"
+    }
+  ]
+}
