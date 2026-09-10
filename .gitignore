@@ -3,6 +3,8 @@
 .env.*
 *.key
 secrets/
+# 但模板必须进仓库，否则别人克隆后拿不到、也就无从照着填
+!.env.example
 
 # 本地数据与产物
 data/
