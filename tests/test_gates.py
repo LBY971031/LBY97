@@ -142,3 +142,17 @@ def test_absent_ranges_must_be_absentrange_objects():
                        absent_ranges=[{"absent_reason": "wrong shape"}])
     with pytest.raises(KeyError):
         filter_outbound(env)
+
+
+def test_tool_errors_never_enter_the_evidence_pool():
+    """SDK runner 会把工具异常当普通结果交给模型，不能让它冒充证据。"""
+    from agent.base import collect_payloads
+    resp = {"role": "user", "content": [
+        {"type": "tool_result", "content": '{"kwh": 8.09}'},
+        {"type": "tool_result", "content": "ValueError('boundary: leak')",
+         "is_error": True},
+    ]}
+    evidence, errors = collect_payloads(resp)
+    assert evidence == ['{"kwh": 8.09}']
+    assert len(errors) == 1
+    assert collect_payloads(None) == ([], [])

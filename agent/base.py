@@ -12,6 +12,27 @@ MODEL = "claude-opus-5"
 PROMPT_DIR = Path(__file__).parent / "prompts"
 
 
+def collect_payloads(resp: dict | None) -> tuple[list[str], list[str]]:
+    """Split a tool-call response into evidence and errors.
+
+    The SDK runner swallows exceptions raised inside a tool and hands the
+    model repr(exc) as an ordinary tool result. Two consequences we must
+    handle rather than inherit:
+
+    1. A boundary violation no longer aborts the run - the agent just reads
+       an error string and carries on. So the caller has to notice.
+    2. Error text must not join the evidence pool, or gate three would treat
+       numbers inside an exception message as vouched-for data.
+    """
+    if resp is None:
+        return [], []
+    evidence, errors = [], []
+    for block in resp.get("content", []):
+        text = str(block.get("content", ""))
+        (errors if block.get("is_error") else evidence).append(text)
+    return evidence, errors
+
+
 class SubAgentBase:
     name = "sub-agent"
     prompt_file = ""
@@ -42,12 +63,13 @@ class SubAgentBase:
         )
 
         payloads: list[str] = []
+        tool_errors: list[str] = []
         final = None
         for message in runner:
             final = message
-            resp = runner.generate_tool_call_response()
-            if resp is not None:
-                payloads += [str(b.get("content", "")) for b in resp["content"]]
+            evidence, errors = collect_payloads(runner.generate_tool_call_response())
+            payloads += evidence
+            tool_errors += errors
 
         if final is not None and final.stop_reason == "refusal":
             return {"agent": self.name, "text": "", "verified": False,
@@ -56,5 +78,12 @@ class SubAgentBase:
         text = "".join(b.text for b in (final.content if final else [])
                        if getattr(b, "type", "") == "text")
         result = verify_numbers(text, payloads)
+
+        # 工具报错不能当作没发生：闸二靠抛异常阻止泄漏，而 runner 会把异常
+        # 咽掉并让模型继续往下写。这里把它显式地变成「未通过」。
+        if tool_errors:
+            return {"agent": self.name, "text": text, "verified": False,
+                    "note": f"{len(tool_errors)} 次工具调用失败: "
+                            + "; ".join(t[:120] for t in tool_errors[:3])}
         return {"agent": self.name, "text": text,
                 "verified": result.passed, "note": result.message()}

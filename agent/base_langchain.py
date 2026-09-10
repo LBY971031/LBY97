@@ -88,11 +88,19 @@ class LangChainSubAgent:
         result = self.graph.invoke({"messages": [HumanMessage(user_input)]})
         messages = result["messages"]
 
-        payloads = [str(m.content) for m in messages
-                    if isinstance(m, ToolMessage)]
+        # 与 SDK 版同理：出错的工具结果不能进闸三的证据池
+        tool_msgs = [m for m in messages if isinstance(m, ToolMessage)]
+        payloads = [str(m.content) for m in tool_msgs
+                    if getattr(m, "status", "success") != "error"]
+        tool_errors = [str(m.content) for m in tool_msgs
+                       if getattr(m, "status", "success") == "error"]
         finals = [m for m in messages if isinstance(m, AIMessage)]
         text = _text_of(finals[-1]) if finals else ""
 
+        if tool_errors:
+            return {"agent": self.name, "text": text, "verified": False,
+                    "note": f"{len(tool_errors)} 次工具调用失败: "
+                            + "; ".join(t[:120] for t in tool_errors[:3])}
         verdict = verify_numbers(text, payloads)
         return {"agent": self.name, "text": text,
                 "verified": verdict.passed, "note": verdict.message()}

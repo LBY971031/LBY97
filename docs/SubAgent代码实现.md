@@ -134,7 +134,7 @@ agent/
 | 闸 | 触发时的表现 | 处理 |
 |---|---|---|
 | 一 | `safe_sum` 返回 `None` | **不是 bug。**说明这段时间的数据确实不全，报告里如实写「无法计算」，不要改成 0 |
-| 二 | `assert_no_leak` 抛 `ValueError` | **中断本次调用。**先查是哪个字段漏进了 `data`，把它加进 `FORBIDDEN` 或 `PSEUDONYM`，不要放宽正则 |
+| 二 | `assert_no_leak` 抛 `ValueError` | **该次工具调用作废，整份结论标为未通过。**注意 SDK 的 tool_runner 会咽掉工具里的异常、把 `repr(exc)` 当普通结果交给模型，所以「中断」不是自动发生的——`base.collect_payloads()` 负责把它挑出来。先查是哪个字段漏进了 `data`，加进 `FORBIDDEN` 或 `PSEUDONYM`，不要放宽正则 |
 | 三 | `verified: False` | 该 SubAgent 的结论**不进正文**，其未核实数字列在摘要开头。多半是提示词纵容了模型自行换算，去 `_shared.md` 里收紧 |
 
 <span style="color:#888">（三道闸都不负责「让结果更好看」，只负责「让错的东西过不去」。闸经常响不代表代码有问题，往往说明数据采集侧有缺口——那是真实情况，不该被代码抹平。）</span>
