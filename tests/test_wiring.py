@@ -31,15 +31,31 @@ def test_tools_are_not_shared_between_agents():
     assert len(names) == len(set(names)), "同一个工具挂在多个 Agent 上"
 
 
+SAMPLE_ARGS = {
+    "hour_start": HOUR,
+    "instant": "2026-08-30T15:30:00+08:00",
+    "region": "CN-SC",
+    "mode": "hour",
+    "planned_mtokens_json": '{"Qwen2.5-72B": 1.0}',
+    "ts_from": "2026-08-30T00:00:00+08:00",
+    "ts_to": "2026-08-31T00:00:00+08:00",
+    "version": 1,
+}
+
+
+def _call(tool):
+    """Build arguments from the tool's own schema rather than guessing."""
+    props = tool.input_schema.get("properties", {})
+    unknown = set(props) - set(SAMPLE_ARGS)
+    assert not unknown, f"{tool.name} 有测试未覆盖的参数: {unknown}"
+    return tool(**{k: SAMPLE_ARGS[k] for k in props})
+
+
 @pytest.mark.parametrize("cls", AGENTS)
 def test_every_tool_passes_the_boundary(cls):
     """任何工具的返回都必须已脱敏——即绕不过 _emit()。"""
     for tool in cls.tools:
-        kwargs = {"hour_start": HOUR}
-        if "planned_mtokens_json" in tool.input_schema.get("properties", {}):
-            kwargs["planned_mtokens_json"] = '{"Qwen2.5-72B": 1.0}'
-        out = tool(**kwargs)
-        assert "srv-0" not in out, f"{tool.name} 泄漏了原始设备 ID"
+        assert "srv-0" not in _call(tool), f"{tool.name} 泄漏了原始设备 ID"
 
 
 def test_langchain_twin_tracks_the_sdk_version(monkeypatch):
@@ -82,3 +98,38 @@ def test_orchestrator_isolates_a_failing_subagent():
     assert rep is not None, "一个 Agent 失败不应导致快照丢失"
     assert rep["verified"] is False
     assert len([t for t in rep["sections"].values() if t]) == 2
+
+
+# ------------------------------------------------------- query layer
+def test_query_agent_cannot_reach_raw_data():
+    """查询 Agent 的工具集里不得有任何能读原始表的工具。"""
+    from agent.subagents import tools_hour
+    from agent.subagents.query_agent import QueryAgent
+
+    raw_tools = {t.name for t in (tools_hour.TOOLS_SUB1 + tools_hour.TOOLS_SUB2
+                                  + tools_hour.TOOLS_SUB3)}
+    query_tools = {t.name for t in QueryAgent.tools}
+    assert not (query_tools & raw_tools), "查询 Agent 拿到了能重算的工具"
+
+
+def test_query_tools_report_a_missing_snapshot_as_missing():
+    import json
+
+    from agent.subagents.tools_query import get_hour_report
+    env = json.loads(get_hour_report("1999-01-01T00:00:00+08:00")
+                     .split("\n\n[DATA GAPS]")[0])
+    assert env["status"] == "no_data"
+    assert env["absent_ranges"], "没有快照时必须说明，而不是返回空报告"
+
+
+def test_hourly_job_is_importable():
+    import agent.hourly_job as job
+    assert callable(job.main)
+
+
+def test_audit_requires_an_agent_name():
+    import inspect
+
+    from agent.audit import log_call
+    params = inspect.signature(log_call).parameters
+    assert params["agent_name"].default is inspect.Parameter.empty

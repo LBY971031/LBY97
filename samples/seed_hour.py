@@ -38,6 +38,16 @@ TASKS = [
 # BMC on srv-03 dropped out for this stretch: no power samples at all.
 GAP = ("srv-03", "15:20", "15:35", "BMC unreachable, no power samples")
 
+# 园区自发绿电（合成）。15:00-16:00 是下午，光伏在衰减、风力小幅波动。
+# 刻意让前几个区间的光伏出力超过当时的负荷：绿电发得出、用不掉，
+# 富余部分在逐区间匹配下不能结转。这是 24/7 CFE 与「年度总量互抵」
+# 拉开差距的地方，样本必须能触发它，否则两种算法永远同值、测不出区别。
+PV_KW = [9.0, 8.4, 7.8, 7.0, 6.2, 5.4, 4.6, 3.8, 3.2, 2.7, 2.3, 2.0]  # 每 5 分钟
+WIND_KW = [0.8, 0.9, 1.1, 1.4, 1.2, 0.9, 0.7, 0.6, 0.8, 1.0, 1.1, 0.9]
+# 储能：正为放电（对外供电），负为充电。这一小时先充后放。
+STORAGE_KW = [-1.5, -1.5, -1.2, -0.8, 0.0, 0.0, 0.5, 1.2, 1.8, 1.5, 0.8, 0.0]
+STORAGE_EFFICIENCY = 0.88          # 往返效率
+
 
 def _t(hhmm: str) -> datetime:
     h, m = map(int, hhmm.split(":"))
@@ -87,6 +97,25 @@ def build() -> dict:
                     for k, v in SERVERS.items()},
         "tasks": tasks,
         "power_samples": power,
+        "onsite_generation": [
+            {"ts_start": (HOUR + timedelta(minutes=k * 5)).isoformat(),
+             "ts_end": (HOUR + timedelta(minutes=k * 5 + 5)).isoformat(),
+             "pv_kw": PV_KW[k], "wind_kw": WIND_KW[k],
+             "value_status": "measured"}
+            for k in range(12)
+        ],
+        "storage": {
+            "round_trip_efficiency": STORAGE_EFFICIENCY,
+            "samples": [
+                {"ts_start": (HOUR + timedelta(minutes=k * 5)).isoformat(),
+                 "ts_end": (HOUR + timedelta(minutes=k * 5 + 5)).isoformat(),
+                 "power_kw": STORAGE_KW[k],
+                 "mode": ("charge" if STORAGE_KW[k] < 0
+                          else "discharge" if STORAGE_KW[k] > 0 else "idle"),
+                 "value_status": "measured"}
+                for k in range(12)
+            ],
+        },
         "grid": {
             "hour_start": HOUR.isoformat(),
             "mix_pct": {"hydro": 62.0, "wind": 8.0, "solar": 11.0, "thermal": 19.0},

@@ -15,10 +15,12 @@ agent/
 ├── verifier.py       §五   结论回检
 ├── base.py           §六   SubAgent 基类
 ├── snapshot.py       §七   小时快照的存取（追加式版本）
-├── subagents/        §八   工具集 + 三个分析 Agent
+├── audit.py                调用审计（每次调用一行 JSON）
+├── hourly_job.py           cron 入口：跑上一个整点
+├── subagents/        §八   16 个工具 + 三个分析 Agent
 │                     §十   查询 Agent（提问时走这条）
 ├── orchestrator.py   §九   主 Agent：每小时跑一次，写快照
-└── prompts/                提示词六个文件（不在本文范围）
+└── prompts/                提示词六个文件（_shared + 五个各自的）
 ```
 
 ### 1.1 每个文件干什么
@@ -30,9 +32,11 @@ agent/
 | `verifier.py` | Agent 说完话之后，回头核对它说的每个数字 | `base.run()` | 编造的数字直接进报告，没人发现 |
 | `base.py` | 三个 SubAgent 的公共骨架：拼提示词、跑 `tool_runner`、收工具返回、触发回检 | 三个 Agent 子类 | 三份重复的循环代码，三种不一致的回检时机 |
 | `snapshot.py` | 小时快照的存取：追加式写入，旧版本永不覆盖 | `orchestrator`、查询 Agent | 报告只能现算现用，无法复现、无法审计 |
-| `subagents/` | 十四个工具 + 三个分析 Agent + 一个查询 Agent | `orchestrator`、入口程序 | —— 这是实际干活的地方 |
+| `subagents/` | 16 个工具 + 三个分析 Agent + 一个查询 Agent | `orchestrator`、入口程序 | —— 这是实际干活的地方 |
 | `orchestrator.py` | **每小时跑一次**：分派三个 SubAgent、失败隔离、把结果写成快照 | 定时任务 | 一个 SubAgent 报错就炸掉整个小时的分析 |
 | `prompts/` | 六个提示词文件：`_shared.md` + 五个各自的 | `base.system_prompt()` | 三道闸的自然语言版本无处安放 |
+| `hourly_job.py` | cron 入口：算出上一个整点并调 `run_hour()` | crontab | 快照表永远是空的 |
+| `audit.py` | 每次调用追加一行 JSON，`agent_name` 必填 | 各 Agent | 报告出问题时追不回是谁调的 |
 
 ### 1.2 依赖方向（单向，不许回头）
 
@@ -42,7 +46,7 @@ agent/
          │            ▼
          │       snapshot.py     快照存取（只依赖 sqlite3）
          ▼
-        subagents/               十四个工具 + 四个 Agent 子类
+        subagents/               16 个工具 + 四个 Agent 子类
          │        │        │
          │        │        ▼
          │        │     base.py           跑 tool_runner、收工具返回
@@ -141,7 +145,7 @@ agent/
 |---|---|
 | 数字由代码算，话由 Agent 说 | 工具只返回 `ToolEnvelope`，Agent 拿不到任何计算工具 |
 
-<span style="color:#888">（这条没有对应的检查函数，它靠工具集的设计来保证：十四个工具全部是「查询/测算/定口径」，没有一个接受表达式或让模型自定义算法。模型能做的只有挑工具、传参数、读结果、写话。闸三是它的事后验证。）</span>
+<span style="color:#888">（这条没有对应的检查函数，它靠工具集的设计来保证：16 个工具全部是「查询/测算/定口径」，没有一个接受表达式或让模型自定义算法。模型能做的只有挑工具、传参数、读结果、写话。闸三是它的事后验证。）</span>
 
 ---
 
@@ -592,22 +596,24 @@ def query_idle_rate(model_sku: str, ts_from: str, ts_to: str) -> str:
 
 <span style="color:#888">（十个数据工具形状完全一致，只有 `core.*` 不同，故只给一个范例；`resolve_time_window` 与三个查询工具是例外——前者纯日期计算，后者读快照，都不走 `core`。每个都套同一模板：取 core 结果 → `drop_absent` → 装进 `ToolEnvelope` → `_emit`。任何工具都不得自己拼返回串，否则边界就有了第二个出口。测算类工具的 `caliber` 必填，否则口径不明的数字会被当成可比数字。）</span>
 
-| Agent | 工具 | core 函数 | 回答 |
-|---|---|---|---|
-| 共用 | `resolve_time_window` | 无（纯日期计算） | 把「下午 3:30」定成确切窗口 |
-| 1 | `query_tasks_running` | `core.task.running_in` | 窗口内哪些任务在跑、各在哪台机器 |
-| 1 | `query_idle_rate` | `core.idle.idle_rate` | 空置率、空载能耗 |
-| 1 | `query_load_profile` | `core.load.profile` | 哪些时段负荷突增 |
-| 1 | `forecast_energy` | `core.forecast.energy` | 下一周期能耗预测 |
-| 2 | `query_grid_mix` | `core.grid.hourly_mix` | 逐小时风光占比 |
-| 2 | `match_cfe_hourly` | `core.cfe.hourly_match` | 24/7 CFE 匹配得分 |
-| 2 | `storage_net_effect` | `core.storage.net_carbon` | 储能真减碳还是负贡献 |
-| 3 | `align_factors` | `core.factor.align` | 跨库因子对齐与差异 |
-| 3 | `token_footprint` | `core.token.footprint` | 每百万 Token 碳足迹 |
-| 3 | `build_report` | `core.report.render` | 核算报告 |
-| 查询 | `get_hour_report` | 无（读快照） | 某小时的完整报告 |
-| 查询 | `list_hour_reports` | 无（读快照） | 一段时间的逐小时序列 |
-| 查询 | `get_report_version` | 无（读快照） | 某小时的某个历史版本 |
+| Agent | 工具 | 回答 |
+|---|---|---|
+| 1 | `resolve_time_window` | 把「下午 3:30」定成确切窗口 |
+| 1 | `query_tasks_running` | 窗口内哪些任务在跑、各在哪台机器 |
+| 1 | `query_energy` | 逐服务器能耗、任务分摊、空载 |
+| 1 | `query_load_profile` | 分钟级负荷形状与持续突增时段 |
+| 1 | `query_idle_rate` | 逐服务器与逐机型空置率、GPU 利用率 |
+| 1 | `energy_intensity` | 各模型实测 kWh/百万 Token |
+| 1 | `forecast_energy` | 按计划 Token 量预测能耗 |
+| 2 | `query_grid_mix` | 该小时电网电源结构 |
+| 2 | `match_emission_factor` | 因子库匹配，返回全部候选与差距 |
+| 2 | `match_cfe_hourly` | 24/7 逐区间绿电匹配得分 |
+| 2 | `storage_net_effect` | 储能是净减碳还是净增碳 |
+| 3 | `query_carbon` | 逐服务器与逐任务碳排 |
+| 3 | `energy_flow_report` | 电网→服务器→任务→Token 四段能量流 |
+| 查询 | `get_hour_report` | 某小时的完整快照 |
+| 查询 | `list_hour_reports` | 一段时间的逐小时序列 |
+| 查询 | `get_report_version` | 某小时的某个历史版本 |
 
 <span style="color:#888">（前十一个工具供**每小时的分析**使用，读原始数据；后三个供**用户提问**使用，只读快照。两组工具互不重叠——查询 Agent 拿不到任何能读原始表的工具，所以它想重算也没有手段。）</span>
 

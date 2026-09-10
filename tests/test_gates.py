@@ -134,3 +134,11 @@ def test_core_must_not_import_agent():
             elif isinstance(node, ast.Import):
                 for a in node.names:
                     assert not a.name.startswith("agent"), path
+
+
+def test_absent_ranges_must_be_absentrange_objects():
+    """传裸 dict 会在 boundary 深处 KeyError —— 这条守住契约。"""
+    env = ToolEnvelope(ToolStatus.PARTIAL, {"kwh": 1}, 2, 1,
+                       absent_ranges=[{"absent_reason": "wrong shape"}])
+    with pytest.raises(KeyError):
+        filter_outbound(env)

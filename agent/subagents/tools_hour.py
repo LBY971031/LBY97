@@ -212,8 +212,139 @@ def energy_flow_report(hour_start: str, region: str = "CN-SC") -> str:
     ))
 
 
+@beta_tool
+def query_load_profile(hour_start: str) -> str:
+    """Minute-level load shape per server, with sustained surges called out.
+
+    Args:
+        hour_start: ISO8601 start of the hour, e.g. 2026-08-30T15:00:00+08:00.
+    """
+    from core import load as core_load
+
+    raw = core_load.load_profile(hour_start)
+    kept, gaps = drop_absent(raw["points"])
+    return _emit(ToolEnvelope(
+        status=ToolStatus.PARTIAL if gaps else ToolStatus.OK,
+        data={"servers": kept, "surges": raw["surges"]},
+        expected_points=raw["expected"], actual_points=len(kept),
+        absent_ranges=gaps, quality_grade=raw["grade"],
+        caliber=raw["caliber"],
+    ))
+
+
+@beta_tool
+def query_idle_rate(hour_start: str) -> str:
+    """Idle rate, GPU utilisation and ownerless idle energy per server and SKU.
+
+    Args:
+        hour_start: ISO8601 start of the hour, e.g. 2026-08-30T15:00:00+08:00.
+    """
+    from core import idle as core_idle
+
+    raw = core_idle.idle_rate(hour_start)
+    kept, gaps = drop_absent(raw["points"])
+    return _emit(ToolEnvelope(
+        status=ToolStatus.PARTIAL if gaps else ToolStatus.OK,
+        data={"servers": kept, "by_sku": raw["by_sku"],
+              "idle_energy_kwh": _round(safe_sum(kept, "idle_energy_kwh"))},
+        expected_points=raw["expected"], actual_points=len(kept),
+        absent_ranges=gaps, quality_grade=raw["grade"],
+        caliber=raw["caliber"],
+    ))
+
+
+@beta_tool
+def match_cfe_hourly(hour_start: str) -> str:
+    """24/7 carbon-free energy score: green power matched interval by interval.
+
+    Args:
+        hour_start: ISO8601 start of the hour, e.g. 2026-08-30T15:00:00+08:00.
+    """
+    from core import cfe as core_cfe
+
+    raw = core_cfe.hourly_match(hour_start)
+    kept, gaps = drop_absent(raw["points"] + raw.get("absent_servers", []))
+    return _emit(ToolEnvelope(
+        status=ToolStatus.PARTIAL if gaps else ToolStatus.OK,
+        data={"intervals": kept,
+              "load_kwh": raw.get("load_kwh"),
+              "green_generated_kwh": raw.get("green_generated_kwh"),
+              "green_matched_kwh": raw.get("green_matched_kwh"),
+              "cfe_score_pct": raw.get("cfe_score_pct"),
+              "naive_green_share_pct": raw.get("naive_green_share_pct"),
+              "overstatement_pct_points": raw.get("overstatement_pct_points"),
+              "load_is_partial": raw.get("load_is_partial")},
+        expected_points=raw["expected"], actual_points=len(raw["points"]),
+        absent_ranges=gaps, quality_grade=raw["grade"],
+        caliber=raw.get("caliber"),
+    ))
+
+
+@beta_tool
+def storage_net_effect(hour_start: str) -> str:
+    """Whether the battery reduced or increased carbon this hour.
+
+    Args:
+        hour_start: ISO8601 start of the hour, e.g. 2026-08-30T15:00:00+08:00.
+    """
+    from core import storage as core_storage
+
+    raw = core_storage.net_carbon(hour_start)
+    kept, gaps = drop_absent(raw["points"])
+    return _emit(ToolEnvelope(
+        status=ToolStatus.OK if kept else ToolStatus.NO_DATA,
+        data={"samples": kept,
+              "charged_kwh": raw.get("charged_kwh"),
+              "discharged_kwh": raw.get("discharged_kwh"),
+              "loss_kwh": raw.get("loss_kwh"),
+              "net_reduction_gco2e": raw.get("net_reduction_gco2e"),
+              "sign_convention": raw.get("sign_convention"),
+              "is_net_increase": raw.get("is_net_increase"),
+              "verdict": raw.get("verdict")},
+        expected_points=raw["expected"], actual_points=len(kept),
+        absent_ranges=gaps, quality_grade=raw["grade"],
+        caliber=raw.get("caliber"),
+    ))
+
+
+@beta_tool
+def resolve_time_window(instant: str, mode: str = "hour") -> str:
+    """Resolve an instant into an explicit half-open analysis window.
+
+    Args:
+        instant: ISO8601 instant, e.g. 2026-08-30T15:30:00.
+        mode: "hour" (default, matches emission factor granularity),
+            "bucket" for 15 minutes, or "minute" for drill-down.
+    """
+    import json as _json
+    from datetime import datetime, timedelta, timezone
+
+    spans = {"minute": timedelta(minutes=1), "bucket": timedelta(minutes=15),
+             "hour": timedelta(hours=1)}
+    if mode not in spans:
+        raise ValueError(f"unknown mode: {mode}")
+
+    t = datetime.fromisoformat(instant)
+    if t.tzinfo is None:
+        t = t.replace(tzinfo=timezone(timedelta(hours=8)))
+    floored = t.replace(second=0, microsecond=0)
+    if mode == "hour":
+        start = floored.replace(minute=0)
+    elif mode == "bucket":
+        start = floored.replace(minute=floored.minute // 15 * 15)
+    else:
+        start = floored
+
+    return _json.dumps({"instant": t.isoformat(),
+                        "ts_from": start.isoformat(),
+                        "ts_to": (start + spans[mode]).isoformat(),
+                        "mode": mode}, ensure_ascii=False)
+
+
 # 编号在这里落地：三个 SubAgent 各自能调的工具
-TOOLS_SUB1 = [query_tasks_running, query_energy, energy_intensity,
+TOOLS_SUB1 = [resolve_time_window, query_tasks_running, query_energy,
+              query_load_profile, query_idle_rate, energy_intensity,
               forecast_energy]
-TOOLS_SUB2 = [query_grid_mix, match_emission_factor]
+TOOLS_SUB2 = [query_grid_mix, match_emission_factor, match_cfe_hourly,
+              storage_net_effect]
 TOOLS_SUB3 = [query_carbon, energy_flow_report]

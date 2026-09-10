@@ -2562,6 +2562,181 @@
       "value_status": "measured"
     }
   ],
+  "onsite_generation": [
+    {
+      "ts_start": "2026-08-30T15:00:00+08:00",
+      "ts_end": "2026-08-30T15:05:00+08:00",
+      "pv_kw": 9.0,
+      "wind_kw": 0.8,
+      "value_status": "measured"
+    },
+    {
+      "ts_start": "2026-08-30T15:05:00+08:00",
+      "ts_end": "2026-08-30T15:10:00+08:00",
+      "pv_kw": 8.4,
+      "wind_kw": 0.9,
+      "value_status": "measured"
+    },
+    {
+      "ts_start": "2026-08-30T15:10:00+08:00",
+      "ts_end": "2026-08-30T15:15:00+08:00",
+      "pv_kw": 7.8,
+      "wind_kw": 1.1,
+      "value_status": "measured"
+    },
+    {
+      "ts_start": "2026-08-30T15:15:00+08:00",
+      "ts_end": "2026-08-30T15:20:00+08:00",
+      "pv_kw": 7.0,
+      "wind_kw": 1.4,
+      "value_status": "measured"
+    },
+    {
+      "ts_start": "2026-08-30T15:20:00+08:00",
+      "ts_end": "2026-08-30T15:25:00+08:00",
+      "pv_kw": 6.2,
+      "wind_kw": 1.2,
+      "value_status": "measured"
+    },
+    {
+      "ts_start": "2026-08-30T15:25:00+08:00",
+      "ts_end": "2026-08-30T15:30:00+08:00",
+      "pv_kw": 5.4,
+      "wind_kw": 0.9,
+      "value_status": "measured"
+    },
+    {
+      "ts_start": "2026-08-30T15:30:00+08:00",
+      "ts_end": "2026-08-30T15:35:00+08:00",
+      "pv_kw": 4.6,
+      "wind_kw": 0.7,
+      "value_status": "measured"
+    },
+    {
+      "ts_start": "2026-08-30T15:35:00+08:00",
+      "ts_end": "2026-08-30T15:40:00+08:00",
+      "pv_kw": 3.8,
+      "wind_kw": 0.6,
+      "value_status": "measured"
+    },
+    {
+      "ts_start": "2026-08-30T15:40:00+08:00",
+      "ts_end": "2026-08-30T15:45:00+08:00",
+      "pv_kw": 3.2,
+      "wind_kw": 0.8,
+      "value_status": "measured"
+    },
+    {
+      "ts_start": "2026-08-30T15:45:00+08:00",
+      "ts_end": "2026-08-30T15:50:00+08:00",
+      "pv_kw": 2.7,
+      "wind_kw": 1.0,
+      "value_status": "measured"
+    },
+    {
+      "ts_start": "2026-08-30T15:50:00+08:00",
+      "ts_end": "2026-08-30T15:55:00+08:00",
+      "pv_kw": 2.3,
+      "wind_kw": 1.1,
+      "value_status": "measured"
+    },
+    {
+      "ts_start": "2026-08-30T15:55:00+08:00",
+      "ts_end": "2026-08-30T16:00:00+08:00",
+      "pv_kw": 2.0,
+      "wind_kw": 0.9,
+      "value_status": "measured"
+    }
+  ],
+  "storage": {
+    "round_trip_efficiency": 0.88,
+    "samples": [
+      {
+        "ts_start": "2026-08-30T15:00:00+08:00",
+        "ts_end": "2026-08-30T15:05:00+08:00",
+        "power_kw": -1.5,
+        "mode": "charge",
+        "value_status": "measured"
+      },
+      {
+        "ts_start": "2026-08-30T15:05:00+08:00",
+        "ts_end": "2026-08-30T15:10:00+08:00",
+        "power_kw": -1.5,
+        "mode": "charge",
+        "value_status": "measured"
+      },
+      {
+        "ts_start": "2026-08-30T15:10:00+08:00",
+        "ts_end": "2026-08-30T15:15:00+08:00",
+        "power_kw": -1.2,
+        "mode": "charge",
+        "value_status": "measured"
+      },
+      {
+        "ts_start": "2026-08-30T15:15:00+08:00",
+        "ts_end": "2026-08-30T15:20:00+08:00",
+        "power_kw": -0.8,
+        "mode": "charge",
+        "value_status": "measured"
+      },
+      {
+        "ts_start": "2026-08-30T15:20:00+08:00",
+        "ts_end": "2026-08-30T15:25:00+08:00",
+        "power_kw": 0.0,
+        "mode": "idle",
+        "value_status": "measured"
+      },
+      {
+        "ts_start": "2026-08-30T15:25:00+08:00",
+        "ts_end": "2026-08-30T15:30:00+08:00",
+        "power_kw": 0.0,
+        "mode": "idle",
+        "value_status": "measured"
+      },
+      {
+        "ts_start": "2026-08-30T15:30:00+08:00",
+        "ts_end": "2026-08-30T15:35:00+08:00",
+        "power_kw": 0.5,
+        "mode": "discharge",
+        "value_status": "measured"
+      },
+      {
+        "ts_start": "2026-08-30T15:35:00+08:00",
+        "ts_end": "2026-08-30T15:40:00+08:00",
+        "power_kw": 1.2,
+        "mode": "discharge",
+        "value_status": "measured"
+      },
+      {
+        "ts_start": "2026-08-30T15:40:00+08:00",
+        "ts_end": "2026-08-30T15:45:00+08:00",
+        "power_kw": 1.8,
+        "mode": "discharge",
+        "value_status": "measured"
+      },
+      {
+        "ts_start": "2026-08-30T15:45:00+08:00",
+        "ts_end": "2026-08-30T15:50:00+08:00",
+        "power_kw": 1.5,
+        "mode": "discharge",
+        "value_status": "measured"
+      },
+      {
+        "ts_start": "2026-08-30T15:50:00+08:00",
+        "ts_end": "2026-08-30T15:55:00+08:00",
+        "power_kw": 0.8,
+        "mode": "discharge",
+        "value_status": "measured"
+      },
+      {
+        "ts_start": "2026-08-30T15:55:00+08:00",
+        "ts_end": "2026-08-30T16:00:00+08:00",
+        "power_kw": 0.0,
+        "mode": "idle",
+        "value_status": "measured"
+      }
+    ]
+  },
   "grid": {
     "hour_start": "2026-08-30T15:00:00+08:00",
     "mix_pct": {
