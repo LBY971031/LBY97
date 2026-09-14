@@ -36,31 +36,44 @@ def check_package(name: str, install: str, *, required: bool) -> bool:
     return not required
 
 
-def _key_line() -> int:
-    """模板里 ANTHROPIC_API_KEY 在第几行——不写死，免得改模板后提示错行。"""
+def _key_line(env_name: str) -> int:
+    """模板里这个变量在第几行——不写死，免得改模板后提示错行。
+
+    DeepSeek 那两行在模板里是注释掉的，所以要先剥掉行首的 "# "。
+    """
     template = ROOT / ".env.example"
     if template.exists():
         for i, line in enumerate(template.read_text(encoding="utf-8").splitlines(), 1):
-            if line.startswith("ANTHROPIC_API_KEY"):
+            if line.lstrip("# ").startswith(env_name):
                 return i
     return 1
 
 
 def check_key() -> bool:
-    from agent.env import ENV_FILE, load_env
+    """查这个模型真正需要的那把钥匙，而不是一律查 ANTHROPIC_API_KEY。"""
+    from agent.env import ENV_FILE, load_env, provider_for
 
-    load_env()
-    key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+    load_env()                                  # 先读 .env，LC_MODEL 可能写在里面
+    model = os.environ.get("LC_MODEL", "")
+    env_name, expect, console = provider_for(model)
+
+    if env_name == "DEEPSEEK_API_KEY":
+        print(f"{OK}LC_MODEL={model} -> 需要 DeepSeek 密钥，只有 LangChain 入口可用")
+        check_package("langchain_deepseek", "-r requirements-langchain.txt",
+                      required=False)
+
+    key = os.environ.get(env_name, "").strip()
     if not key:
-        print(f"{WARN}未找到 ANTHROPIC_API_KEY")
+        print(f"{WARN}未找到 {env_name}")
         print("         确定性部分仍可运行；要用 Agent 请填密钥：")
         print("         1. cp .env.example .env    (Windows: copy .env.example .env)")
-        print(f"         2. 编辑 {ENV_FILE} 第 {_key_line()} 行")
+        print(f"         2. 编辑 {ENV_FILE} 第 {_key_line(env_name)} 行")
+        print(f"         申请地址：{console}")
         return False
-    if not key.startswith("sk-ant-"):
-        print(f"{WARN}密钥以 {key[:7]!r} 开头，通常应为 'sk-ant-'")
+    if not key.startswith(expect):
+        print(f"{WARN}密钥以 {key[:7]!r} 开头，通常应为 {expect!r}")
         return True
-    print(f"{OK}ANTHROPIC_API_KEY 已配置（{len(key)} 字符）")
+    print(f"{OK}{env_name} 已配置（{len(key)} 字符）")
     return True
 
 
@@ -102,11 +115,14 @@ def main() -> int:
     if not all(hard):
         print("有必须项未通过，先按上面的提示处理。")
         return 1
+    entry = ("demo/run_one_agent_lc.py"
+             if os.environ.get("LC_MODEL", "").lower().startswith("deepseek")
+             else "demo/run_one_agent.py")
     if has_key:
-        print("一切就绪。试试： python demo/run_one_agent.py 3")
+        print(f"一切就绪。试试： python {entry} 3")
     else:
         print("确定性部分就绪，可以先跑： python demo/run_hour.py")
-        print("填好密钥后再跑：         python demo/run_one_agent.py 3")
+        print(f"填好密钥后再跑：         python {entry} 3")
     return 0
 
 

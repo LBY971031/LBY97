@@ -65,7 +65,7 @@ class LangChainSubAgent:
     tools: list = []
 
     def __init__(self, model: str = MODEL, max_tokens: int = 16000):
-        require_api_key()
+        require_api_key(model)          # 按模型要对应的那把钥匙
         llm = init_chat_model(
             model,
             max_tokens=max_tokens,

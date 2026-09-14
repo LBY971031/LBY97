@@ -44,13 +44,17 @@ def main() -> int:
         result = agent.run(f"请分析 {hour} 这一小时。只使用工具返回的数据，"
                            f"开头先写覆盖率与缺口。")
     except Exception as exc:
+        # 换了模型之后提示也要跟着换，否则用 DeepSeek 的人会被指去查 Anthropic 的 key
+        from agent.env import provider_for
+        env_name, _, _ = provider_for(os.environ.get("LC_MODEL", ""))
+        vendor = "DeepSeek" if env_name == "DEEPSEEK_API_KEY" else "Anthropic"
         name = type(exc).__name__
         if "Authentication" in name:
-            print("密钥无效，请检查 .env 里的 ANTHROPIC_API_KEY。", file=sys.stderr)
+            print(f"密钥无效，请检查 .env 里的 {env_name}。", file=sys.stderr)
         elif "RateLimit" in name:
             print("触发速率限制，稍等片刻重试。", file=sys.stderr)
         elif "Connection" in name:
-            print("连不上 Anthropic，检查网络或代理。", file=sys.stderr)
+            print(f"连不上 {vendor}，检查网络或代理。", file=sys.stderr)
         else:
             print(f"{name}: {exc}", file=sys.stderr)
         return 1
