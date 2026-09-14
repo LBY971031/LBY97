@@ -1,0 +1,53 @@
+{
+  "_source": "《大语言模型系统级单位token能耗测评》PPT，清华电机系信息能源实验室等联合编制",
+  "_critical": "PPT为【单一硬件平台 × 8模型 × 3场景】，GPU型号在幻灯片6中为空白（'8 x NVIDIA '）",
+  "measurement_stack": {
+    "benchmark": "ml-energy/benchmark v3.0",
+    "engine": "vLLM 0.19.1 (Docker)",
+    "energy_lib": "Zeus 0.13.1",
+    "observability": "Prometheus + vLLM /metrics",
+    "tokenizer": "transformers 5.5.4",
+    "energy_scope": "Zeus 经 NVML 读取，为【GPU-only】能耗，不含CPU/内存/NVSwitch/风扇/PSU损耗"
+  },
+  "workloads": {
+    "W1_text":  {"name": "lm-arena-chat", "dataset": "lmarena-ai/arena-human-preference-100k", "requests": 256,  "max_output": 1024},
+    "W3_code":  {"name": "sourcegraph-fim", "dataset": "sourcegraph/context-aware-fim-code-completions", "requests": 1024, "max_output": 2048},
+    "W4_image": {"name": "image-chat", "dataset": "lmarena-ai/VisionArena-Chat", "requests": 1024, "max_output": 4096}
+  },
+  "j_per_token_best": {
+    "_note": "幻灯片7：各模型三场景最低 J/token（最优配置），GPU-only",
+    "Gemma4-31B":      {"params": "31B",  "precision": "BF16", "arch": "Dense", "text": 0.35, "code": 0.47, "image": 0.84},
+    "gpt-oss-120B":    {"params": "120B", "precision": "FP8",  "arch": "MoE",   "text": 0.37, "code": 0.53, "image": null},
+    "Llama4-Maverick": {"params": "400B", "precision": "FP8",  "arch": "MoE",   "text": 0.64, "code": 0.91, "image": 0.86},
+    "Qwen3.5-397B":    {"params": "397B", "precision": "FP8",  "arch": "MoE",   "text": 1.07, "code": 2.18, "image": null},
+    "MiniMax-M2.7":    {"params": "172B", "precision": "BF16", "arch": "MoE",   "text": 0.85, "code": 0.86, "image": null},
+    "DeepSeek-V4":     {"params": null,   "precision": "BF16", "arch": "MoE",   "text": 0.97, "code": 1.92, "image": null, "note": "text值为SGLang；vLLM下为4.43"},
+    "Mistral-Med-3.5": {"params": null,   "precision": "BF16", "arch": "Dense", "text": 0.82, "code": 1.18, "image": 2.28},
+    "MiMo-V2-Flash":   {"params": null,   "precision": "FP8",  "arch": "MoE",   "text": 0.92, "code": 1.43, "image": null}
+  },
+  "configs_with_throughput": [
+    {"model": "gpt-oss-120B",    "scene": "text",  "tp": 8, "bs": 128, "j_per_tok": 0.373, "tok_s": 4013, "src": "slide13"},
+    {"model": "gpt-oss-120B",    "scene": "code",  "tp": 8, "bs": 128, "j_per_tok": 0.535, "tok_s": 3846, "src": "slide13"},
+    {"model": "MiniMax-M2.7",    "scene": "code",  "tp": 8, "bs": 256, "j_per_tok": 0.86,  "tok_s": 4180, "src": "slide13"},
+    {"model": "Llama4-Maverick", "scene": "image", "tp": 8, "bs": null,"j_per_tok": 0.86,  "tok_s": 3365, "src": "slide13+7"},
+    {"model": "DeepSeek-V4",     "scene": "text",  "tp": null, "bs": 128, "j_per_tok": 4.43, "tok_s": 487,  "engine": "vLLM",   "src": "slide12"},
+    {"model": "DeepSeek-V4",     "scene": "text",  "tp": null, "bs": 128, "j_per_tok": 0.97, "tok_s": 2763, "engine": "SGLang", "src": "slide12"},
+    {"model": "DeepSeek-V4",     "scene": "code",  "tp": null, "bs": 128, "j_per_tok": 2.83, "tok_s": 764,  "engine": "vLLM",   "src": "slide12"},
+    {"model": "DeepSeek-V4",     "scene": "code",  "tp": null, "bs": 128, "j_per_tok": 1.92, "tok_s": 1879, "engine": "SGLang", "src": "slide12"}
+  ],
+  "deployment_recommendations_slide13": [
+    {"scene": "文本·能效极致", "model": "Gemma4-31B",      "config": "TP=2 bs=128", "j_per_tok": 0.348, "tok_s": null},
+    {"scene": "文本·吞吐优先", "model": "gpt-oss-120B",    "config": "TP=8 bs=128", "j_per_tok": 0.373, "tok_s": 4013},
+    {"scene": "代码·吞吐优先", "model": "MiniMax-REAP",    "config": "TP=8 bs=256", "j_per_tok": 0.86,  "tok_s": 4180},
+    {"scene": "代码·能效优先", "model": "gpt-oss-120B",    "config": "TP=8 bs=128", "j_per_tok": 0.535, "tok_s": 3846},
+    {"scene": "图像·能效优先", "model": "Gemma4-31B",      "config": "TP=2 bs=128", "j_per_tok": 0.467, "tok_s": null},
+    {"scene": "图像·吞吐优先", "model": "Llama4-Maverick", "config": "TP=8",        "j_per_tok": null,  "tok_s": 3365}
+  ],
+  "known_inconsistencies": [
+    "幻灯片13『图像·能效优先 Gemma4-31B 0.467』与幻灯片7『Gemma4 多模态 0.84』冲突；0.467≈幻灯片7的代码列0.47，疑为串列错误",
+    "MiniMax 代码吞吐：幻灯片13为4180 tok/s，幻灯片7特征标签为4300 tok/s",
+    "DeepSeek-V4 精度：幻灯片5标注 FP4+FP8，幻灯片7标注 BF16",
+    "幻灯片6硬件型号缺失：'8 x NVIDIA '（型号为空）",
+    "Gemma4-31B 未给出任何吞吐数据，而它是与四平台选型表重叠的关键模型"
+  ]
+}
