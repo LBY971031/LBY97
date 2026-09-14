@@ -1,0 +1,63 @@
+{
+  "meta": {
+    "topic": "基于百万有效Token的绿色Token生命周期能耗、碳足迹与成本分析",
+    "functional_unit": "1,000,000 effective tokens (百万有效Token)",
+    "source": "用户上传表格图片（四种DGX服务器 × 四种模型选型）",
+    "recorded_on": "2026-09-14",
+    "status": "基础平台参数已录入；PPT《大语言模型系统级单位token能耗测评.pptx》未随会话送达，待补"
+  },
+  "platforms": [
+    {
+      "id": "DGX-A100",
+      "gpu_arch": "Ampere",
+      "gpu_config": "8 × A100 80GB",
+      "gpu_total_memory_GB": 640,
+      "model_under_test": "LLaMA 2-13B",
+      "system_memory_TB": 2,
+      "max_input_power_kW": 6.5,
+      "chassis_mass_kg": 123.16,
+      "positioning": "基准平台"
+    },
+    {
+      "id": "DGX-H100",
+      "gpu_arch": "Hopper",
+      "gpu_config": "8 × H100 80GB",
+      "gpu_total_memory_GB": 640,
+      "model_under_test": "Llama 3.1-8B",
+      "system_memory_TB": 2,
+      "max_input_power_kW": 10.2,
+      "chassis_mass_kg": 130.45,
+      "positioning": "高性能计算"
+    },
+    {
+      "id": "DGX-H200",
+      "gpu_arch": "Hopper",
+      "gpu_config": "8 × H200 141GB",
+      "gpu_total_memory_GB": 1128,
+      "model_under_test": "Gemma 4-31B",
+      "system_memory_TB": 2,
+      "max_input_power_kW": 10.2,
+      "chassis_mass_kg": null,
+      "chassis_mass_note": "表中标注“待核实”；DGX H200 与 DGX H100 同底座，建议暂按 130.45 kg 代入并标注为估计值",
+      "positioning": "大显存推理"
+    },
+    {
+      "id": "DGX-B200",
+      "gpu_arch": "Blackwell",
+      "gpu_config": "8 × B200 180GB",
+      "gpu_total_memory_GB": 1440,
+      "model_under_test": "MiniMax-M2（表中记作 MiniMax-M2.7，需确认命名）",
+      "system_memory_TB": 2,
+      "max_input_power_kW": 14.3,
+      "chassis_mass_kg": 142.4,
+      "positioning": "新一代AI计算"
+    }
+  ],
+  "open_items": [
+    "PPT《大语言模型系统级单位token能耗测评.pptx》未到达工作目录，需重新上传或粘贴关键页内容",
+    "DGX H200 整机质量待核实（影响隐含碳/制造侧分摊）",
+    "MiniMax 模型精确名称与参数量待确认",
+    "缺少实测：有效吞吐(tokens/s)、实测整机功率、输入/输出token配比、有效token判定口径",
+    "缺少情景参数：PUE、电网碳排放因子、电价、设备购置价与折旧年限、年利用率"
+  ]
+}
