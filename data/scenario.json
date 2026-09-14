@@ -82,5 +82,35 @@
     "PSU_efficiency": 0.94,
     "GPU_idle_power_W": 100,
     "source": "PLACEHOLDER-部件估算，须PDU实测校准"
+  },
+  "power_supply": {
+    "_note": "两种电力接入情景。EF均为生命周期口径(已含设备隐含碳)，避免与服务器隐含碳重复计算",
+    "common": {
+      "alpha_green_direct": 0.6,
+      "alpha_note": "绿电直供比例=同时段直接匹配的负荷占比。风光大基地配套直连，典型40%~80%",
+      "EF_green_lifecycle": 0.025,
+      "EF_green_note": "风光混合生命周期排放因子(IPCC AR5: 光伏~0.041, 陆上风电~0.011)",
+      "LCOE_green": 0.28,
+      "LCOE_green_note": "国内风光大基地绿电直连LCOE，典型0.20~0.35元/kWh"
+    },
+    "S1_储能补电": {
+      "eta_roundtrip": 0.9,
+      "eta_note": "磷酸铁锂电化学储能系统级往返效率(含PCS与辅助)",
+      "EF_storage_facility": 0.011,
+      "EF_storage_note": "60 kgCO2e/kWh容量 ÷ 6000循环 ÷ 0.9 DoD = 0.011 kgCO2e/kWh放电",
+      "cost_storage_facility": 0.3,
+      "cost_note": "储能设施度电成本(不含充电电量成本，避免重复计)，典型0.25~0.45元/kWh放电"
+    },
+    "S2_CCS火电补电": {
+      "EF_ccs_thermal": 0.22,
+      "EF_ccs_note": "燃煤+CCS生命周期排放因子。IPCC AR5中位值220 gCO2eq/kWh；已含90%捕集率、约21%相对能耗惩罚与上游煤炭供应链排放",
+      "price_ccs_thermal": 0.55,
+      "price_note": "燃煤LCOE约0.35 + CCS增量0.15~0.25，取0.55元/kWh"
+    },
+    "baseline_reference": {
+      "EF": 0.5703,
+      "price": 0.6,
+      "note": "全国电网均值，用于对比"
+    }
   }
 }
